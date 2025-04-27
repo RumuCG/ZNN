@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>742</width>
-    <height>534</height>
+    <width>1554</width>
+    <height>810</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -30,8 +30,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>742</width>
-     <height>21</height>
+     <width>1554</width>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -51,6 +51,7 @@
    <addaction name="actdrawrect"/>
    <addaction name="actclear"/>
    <addaction name="actframe"/>
+   <addaction name="actdy"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actdrawrect">
@@ -72,6 +73,14 @@
    </property>
    <property name="text">
     <string>线框渲染</string>
+   </property>
+  </action>
+  <action name="actdy">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>自动变色</string>
    </property>
   </action>
  </widget>

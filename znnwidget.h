@@ -4,6 +4,9 @@
 #include <QWidget>
 #include<QOpenGLWidget>
 #include<QOpenGLFunctions_3_3_Core>
+#include<QOpenGLShaderProgram>
+#include<QTimer>
+#include<QTime>
 
 class znnwidget : public QOpenGLWidget,QOpenGLFunctions_3_3_Core
 {
@@ -13,6 +16,7 @@ public:
     explicit znnwidget(QWidget *parent = nullptr);
     void drawshape(Shape shape);// 对外接口
     void frameline(bool is_frame);
+    void dy(bool is_dy);
     ~znnwidget();
 protected:
     virtual void initializeGL();
@@ -21,7 +25,10 @@ protected:
 signals:
 private:
     Shape m_shape;//保存需要绘制的图像
+    QOpenGLShaderProgram shaderProgram;
+    QTimer timer_1;
 public slots:
+    void on_timeout();
 };
 
 #endif // ZNNWIDGET_H

@@ -1,5 +1,4 @@
 #include "znnwidget.h"
-#include<QOpenGLShaderProgram>
 unsigned int VBO,VAO,EBO;
 //VBO：存数据（What）
 //VAO：定义规则（How）
@@ -22,7 +21,7 @@ unsigned int indices[] = {
 };
 znnwidget::znnwidget(QWidget *parent) : QOpenGLWidget(parent)
 {
-
+    connect(&timer_1,SIGNAL(timeout()),this,SLOT(on_timeout()));
 }
 
 void znnwidget::drawshape(znnwidget::Shape shape)
@@ -42,23 +41,31 @@ void znnwidget::frameline(bool is_frame)
     doneCurrent();
 }
 
+void znnwidget::dy(bool is_dy)
+{
+    //makeCurrent();
+    if(is_dy)
+        timer_1.start(100);
+    else
+        timer_1.stop();
+    //doneCurrent();
+    update();
+}
+
 
 void znnwidget::initializeGL()
 {
     // 创建 VAO 和 VBO 和 EBO
     initializeOpenGLFunctions();
-    QOpenGLShaderProgram shaderProgram;
-    shaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/shader.vert");
+    shaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/shaders.vert");
     shaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/shader.frag");
     shaderProgram.link(); // 链接
-
     shaderProgram.bind();
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1,&EBO);
     // 绑定 VAO（开始记录状态）
     glBindVertexArray(VAO);
-
     // 绑定 VBO 并上传数据
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
@@ -100,8 +107,20 @@ void znnwidget::paintGL()
     //glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
 }
 
+void znnwidget::on_timeout()
+{
+    makeCurrent();
+    GLfloat value = QTime::currentTime().second();
+    // qDebug() << value;
+    value = sin(value)/2.0f + 0.5f;
+    shaderProgram.setUniformValue("utime",value);
+    doneCurrent();
+    update();
+}
+
 znnwidget::~znnwidget()
 {
+    if(!isValid()) return;
     makeCurrent();
     glDeleteBuffers(1,&VBO);
     glDeleteVertexArrays(1,&VAO);

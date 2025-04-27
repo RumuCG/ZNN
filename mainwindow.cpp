@@ -29,3 +29,8 @@ void MainWindow::on_actframe_triggered()
 {
     ui->openGLWidget->frameline(ui->actframe->isChecked());
 }
+
+void MainWindow::on_actdy_triggered()
+{
+    ui->openGLWidget->dy(ui->actdy-> isChecked());
+}

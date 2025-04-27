@@ -22,6 +22,8 @@ private slots:
 
     void on_actframe_triggered();
 
+    void on_actdy_triggered();
+
 private:
     Ui::MainWindow *ui;
 };
