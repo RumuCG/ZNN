@@ -7,6 +7,7 @@
 #include<QOpenGLShaderProgram>
 #include<QTimer>
 #include<QTime>
+#include<QOpenGLTexture>
 
 class znnwidget : public QOpenGLWidget,QOpenGLFunctions_3_3_Core
 {
@@ -27,6 +28,7 @@ private:
     Shape m_shape;//保存需要绘制的图像
     QOpenGLShaderProgram shaderProgram;
     QTimer timer_1;
+    QOpenGLTexture *textureWall;
 public slots:
     void on_timeout();
 };

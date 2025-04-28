@@ -10,10 +10,10 @@ unsigned int VBO,VAO,EBO;
 //解绑 VBO 和 VAO
 float vertices[] = {
     // 4 个顶点坐标
-    -0.5f,  0.5f, 0.0f, // 0: A
-    -0.5f, -0.5f, 0.0f, // 1: B
-    0.5f, -0.5f, 0.0f, // 2: C
-    0.5f,  0.5f, 0.0f  // 3: D
+    -0.5f,  0.5f, 0.0f,1.0f,1.0f, // 0: A
+    -0.5f, -0.5f, 0.0f,1.0f,0.0f, // 1: B
+    0.5f, -0.5f, 0.0f,0.0f,0.0f, // 2: C
+    0.5f,  0.5f, 0.0f,0.0f,1.0f  // 3: D
 };
 unsigned int indices[] = {
     0, 1, 2,  // 第一个三角形
@@ -74,8 +74,17 @@ void znnwidget::initializeGL()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(indices),indices,GL_STATIC_DRAW);
     // 设置顶点属性规则（记录到 VAO 中）
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3*sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
+
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5*sizeof(float), (void*)3);
+    glEnableVertexAttribArray(1);
+    QImage img(":/images/wall.png");
+    //img = img.convertToFormat(QImage::Format_RGBA8888);
+    // 注意：Qt5.9的QImage默认是**左上角原点**，OpenGL是**左下角原点**
+    // 需要 flip 垂直翻转一下：
+    img = img.mirrored();
+    textureWall = new QOpenGLTexture(img);
 
     // 解绑 VBO（可选，但推荐）
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -98,7 +107,9 @@ void znnwidget::paintGL()
     glBindVertexArray(VAO);
     switch (m_shape) {
     case Rect:
+        textureWall -> bind();
         glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
+
         break;
     default:
         break;
