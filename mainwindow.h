@@ -24,6 +24,8 @@ private slots:
 
     void on_actdy_triggered();
 
+    void on_actxc_triggered();
+
 private:
     Ui::MainWindow *ui;
 };

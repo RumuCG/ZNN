@@ -52,6 +52,7 @@
    <addaction name="actclear"/>
    <addaction name="actframe"/>
    <addaction name="actdy"/>
+   <addaction name="actxc"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actdrawrect">
@@ -81,6 +82,14 @@
    </property>
    <property name="text">
     <string>自动变色</string>
+   </property>
+  </action>
+  <action name="actxc">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>启用旋转</string>
    </property>
   </action>
  </widget>

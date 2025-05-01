@@ -34,3 +34,9 @@ void MainWindow::on_actdy_triggered()
 {
     ui->openGLWidget->dy(ui->actdy-> isChecked());
 }
+
+void MainWindow::on_actxc_triggered()
+{
+    ui->openGLWidget->is_xc = ui->actxc->isChecked();
+    update();
+}

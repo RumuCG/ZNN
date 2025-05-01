@@ -8,6 +8,7 @@
 #include<QTimer>
 #include<QTime>
 #include<QOpenGLTexture>
+#include <QKeyEvent>
 
 class znnwidget : public QOpenGLWidget,QOpenGLFunctions_3_3_Core
 {
@@ -18,6 +19,8 @@ public:
     void drawshape(Shape shape);// 对外接口
     void frameline(bool is_frame);
     void dy(bool is_dy);
+    void keyPressEvent(QKeyEvent *event);
+    bool is_xc = false;
     ~znnwidget();
 protected:
     virtual void initializeGL();
@@ -29,6 +32,10 @@ private:
     QOpenGLShaderProgram shaderProgram;
     QTimer timer_1;
     QOpenGLTexture *textureWall;
+    float angle = 0.0f;
+    float offsetX = 0.0f;
+    float offsetY = 0.0f;
+
 public slots:
     void on_timeout();
 };
