@@ -1,13 +1,5 @@
 #include "znnwidget.h"
 unsigned int VBO,VAO,EBO;
-//VBO：存数据（What）
-//VAO：定义规则（How）
-//EBO: 重复顶点资源节省
-//绑定 VAO
-//绑定 VBO
-//上传数据到 VBO
-//设置顶点属性规则
-//解绑 VBO 和 VAO
 znnwidget::znnwidget(QWidget *parent) : QOpenGLWidget(parent)
 {
     setFocusPolicy(Qt::StrongFocus);

@@ -26,6 +26,17 @@ private slots:
 
     void on_actxc_triggered();
 
+
+    void on_horizontalSlider_valueChanged(int value);
+
+    void on_horizontalSlider_2_valueChanged(int value);
+
+    void on_horizontalSlider_3_valueChanged(int value);
+
+    void on_horizontalSlider_4_valueChanged(int value);
+
+    void on_recover_button_clicked();
+
 private:
     Ui::MainWindow *ui;
 };

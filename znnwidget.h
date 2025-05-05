@@ -1,12 +1,12 @@
 #ifndef ZNNWIDGET_H
 #define ZNNWIDGET_H
-
 #include <QWidget>
 #include<QOpenGLWidget>
 #include<QOpenGLFunctions_3_3_Core>
 #include<QOpenGLShaderProgram>
 #include<QTimer>
 #include<QTime>
+#include <QMatrix4x4>
 #include<QOpenGLTexture>
 #include <QKeyEvent>
 #include <bits/stdc++.h>
@@ -19,11 +19,18 @@ class znnwidget : public QOpenGLWidget,QOpenGLFunctions_3_3_Core
 {
     Q_OBJECT
 public:
+    float angleX = 0.0f; // 旋转角度 各轴
+    float angleY = 0.0f;
+    float angleZ = 0.0f;
+    float offsetX = 0.0f;// 上移量
+    float offsetY = 0.0f; // 下移量
+    float scalen = 1.0f; // 缩放比例
     enum Shape{None,Rect,Circle,Triangle};
     explicit znnwidget(QWidget *parent = nullptr);
     void drawshape(Shape shape);// 对外接口
     void frameline(bool is_frame);
     void dy(bool is_dy);
+    void recover(); // 复原坐标系
     void keyPressEvent(QKeyEvent *event);
     bool is_xc = false;
     std::vector<VertexData> vertices;
@@ -38,9 +45,7 @@ private:
     Shape m_shape;//保存需要绘制的图像
     QOpenGLShaderProgram shaderProgram;
     QTimer timer_1;
-    float angle = 0.0f;
-    float offsetX = 0.0f;
-    float offsetY = 0.0f;
+
 
 public slots:
     void on_timeout();
