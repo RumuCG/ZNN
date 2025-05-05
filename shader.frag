@@ -1,10 +1,9 @@
 #version 330 core
-in vec2 TexCoord;
-out vec4 FragColor;
 
-uniform sampler2D textureWall;
+in vec3 vColor;
+out vec4 FragColor;
 
 void main()
 {
-    FragColor = texture(textureWall, TexCoord);
+    FragColor = vec4(vColor, 1.0);  // 插值后的颜色输出
 }

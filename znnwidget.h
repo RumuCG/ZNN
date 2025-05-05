@@ -9,7 +9,12 @@
 #include<QTime>
 #include<QOpenGLTexture>
 #include <QKeyEvent>
-
+#include <bits/stdc++.h>
+#include <QPainter>
+struct VertexData {
+    QVector3D position;
+    QVector3D color;
+};
 class znnwidget : public QOpenGLWidget,QOpenGLFunctions_3_3_Core
 {
     Q_OBJECT
@@ -21,6 +26,8 @@ public:
     void dy(bool is_dy);
     void keyPressEvent(QKeyEvent *event);
     bool is_xc = false;
+    std::vector<VertexData> vertices;
+    QPoint projectToScreen(const QVector3D &worldPos, const QMatrix4x4 &model, const QMatrix4x4 &view, const QMatrix4x4 &proj);
     ~znnwidget();
 protected:
     virtual void initializeGL();
@@ -31,7 +38,6 @@ private:
     Shape m_shape;//保存需要绘制的图像
     QOpenGLShaderProgram shaderProgram;
     QTimer timer_1;
-    QOpenGLTexture *textureWall;
     float angle = 0.0f;
     float offsetX = 0.0f;
     float offsetY = 0.0f;

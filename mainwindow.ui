@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1554</width>
-    <height>810</height>
+    <width>1583</width>
+    <height>917</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,8 +17,8 @@
    <widget class="znnwidget" name="openGLWidget">
     <property name="geometry">
      <rect>
-      <x>80</x>
-      <y>20</y>
+      <x>550</x>
+      <y>60</y>
       <width>300</width>
       <height>200</height>
      </rect>
@@ -30,7 +30,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1554</width>
+     <width>1583</width>
      <height>23</height>
     </rect>
    </property>
@@ -98,7 +98,7 @@
   <customwidget>
    <class>znnwidget</class>
    <extends>QOpenGLWidget</extends>
-   <header location="global">znnwidget.h</header>
+   <header>znnwidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

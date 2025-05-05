@@ -8,55 +8,6 @@ unsigned int VBO,VAO,EBO;
 //上传数据到 VBO
 //设置顶点属性规则
 //解绑 VBO 和 VAO
-float vertices[] = {
-    // 位置               // 纹理坐标
-    // 前面
-    -0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,   1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,   0.0f, 1.0f,
-
-    // 后面
-    -0.5f, -0.5f, -0.5f,   1.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
-
-    // 左面
-    -0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,   1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,   1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
-
-    // 右面
-     0.5f, -0.5f,  0.5f,   0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,   1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,   0.0f, 1.0f,
-
-    // 上面
-    -0.5f,  0.5f,  0.5f,   0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,   1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,   1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,   0.0f, 1.0f,
-
-    // 下面
-    -0.5f, -0.5f, -0.5f,   0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,   1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,   1.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,   0.0f, 1.0f,
-};
-
-
-unsigned int indices[] = {
-    0, 1, 2,   0, 2, 3,       // 前面
-    4, 5, 6,   4, 6, 7,       // 后面
-    8, 9,10,   8,10,11,       // 左面
-   12,13,14,  12,14,15,       // 右面
-   16,17,18,  16,18,19,       // 上面
-   20,21,22,  20,22,23        // 下面
-};
-
 znnwidget::znnwidget(QWidget *parent) : QOpenGLWidget(parent)
 {
     setFocusPolicy(Qt::StrongFocus);
@@ -90,12 +41,49 @@ void znnwidget::dy(bool is_dy)
     //doneCurrent();
     update();
 }
+unsigned int indices[] = {
+    // 前面
+    0, 1, 2, 2, 3, 0,
+    // 右面
+    1, 5, 6, 6, 2, 1,
+    // 后面
+    5, 4, 7, 7, 6, 5,
+    // 左面
+    4, 0, 3, 3, 7, 4,
+    // 上面
+    3, 2, 6, 6, 7, 3,
+    // 下面
+    4, 5, 1, 1, 0, 4
+};
+
+QPoint znnwidget::projectToScreen(const QVector3D &worldPos, const QMatrix4x4 &model, const QMatrix4x4 &view, const QMatrix4x4 &proj)
+{
+    QVector4D clipSpacePos = proj * view * model * QVector4D(worldPos, 1.0f);
+    if (clipSpacePos.w() == 0.0f) return QPoint(-1000, -1000); // 防止除以0
+    QVector3D ndc = clipSpacePos.toVector3DAffine(); // 归一化设备坐标
+    int x = int((ndc.x() * 0.5f + 0.5f) * width());
+    int y = int((1.0f - (ndc.y() * 0.5f + 0.5f)) * height()); // 注意Y轴反过来
+    return QPoint(x, y);
+}
 
 
 void znnwidget::initializeGL()
 {
     // 创建 VAO 和 VBO 和 EBO
     initializeOpenGLFunctions();
+    vertices = {
+        // 前面
+        {{-0.75f, -0.5f,  0.5f}, {1.0f, 0.0f, 0.0f}}, // 0
+        {{ 0.75f, -0.5f,  0.5f}, {0.0f, 1.0f, 0.0f}}, // 1
+        {{ 0.75f,  0.5f,  0.5f}, {0.0f, 0.0f, 1.0f}}, // 2
+        {{-0.75f,  0.5f,  0.5f}, {1.0f, 1.0f, 0.0f}}, // 3
+
+        // 后面
+        {{-0.75f, -0.5f, -0.5f}, {1.0f, 0.0f, 1.0f}}, // 4
+        {{ 0.75f, -0.5f, -0.5f}, {0.0f, 1.0f, 1.0f}}, // 5
+        {{ 0.75f,  0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}}, // 6
+        {{-0.75f,  0.5f, -0.5f}, {0.5f, 0.5f, 0.5f}}, // 7
+    };
 
     glEnable(GL_DEPTH_TEST);
     shaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/shaders.vert");
@@ -108,28 +96,19 @@ void znnwidget::initializeGL()
     // 绑定 VAO（开始记录状态）
     glBindVertexArray(VAO);
     // 绑定 VBO 并上传数据
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
     // 绑定 EBO 并上传数据
     // EBO 必须在 VAO绑定的时候 绑定
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(indices),indices,GL_STATIC_DRAW);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexData), vertices.data(), GL_STATIC_DRAW);
     // 设置顶点属性规则（记录到 VAO 中）
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(VertexData, position));
     glEnableVertexAttribArray(0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(VertexData, color));
     glEnableVertexAttribArray(1);
-
-    QImage img(":/images/wall.png");
-    //img = img.convertToFormat(QImage::Format_RGBA8888);
-    // 注意：Qt5.9的QImage默认是**左上角原点**，OpenGL是**左下角原点**
-    // 需要 flip 垂直翻转一下：
-    img = img.mirrored();
-    textureWall = new QOpenGLTexture(img);
-
     // 解绑 VBO（可选，但推荐）
     glBindBuffer(GL_ARRAY_BUFFER, 0);
-
     // 解绑 VAO（防止意外修改）
     glBindVertexArray(0);
 }
@@ -140,25 +119,6 @@ void znnwidget::resizeGL(int w, int h)
     Q_UNUSED(h)
 }
 
-/*void znnwidget::paintGL()
-{
-    glClearColor(0.2f,0.3f,0.3f,1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-
-    glBindVertexArray(VAO);
-    switch (m_shape) {
-    case Rect:
-        textureWall -> bind();
-        glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
-
-        break;
-    default:
-        break;
-    }
-    //glDrawArrays(GL_TRIANGLES,0,3);
-    //glDrawElements(GL_TRIANGLES,6,GL_UNSIGNED_INT,0);
-
-}*/
 void znnwidget::paintGL()
 {
     glClearColor(0.2f,0.3f,0.3f,1.0f);
@@ -166,6 +126,7 @@ void znnwidget::paintGL()
 
     shaderProgram.bind();
     QMatrix4x4 model;
+    //model.scale(1.5f);  // 放大
     model.translate(offsetX, offsetY, 0.0f);
     model.rotate(angle, 1.0f, 1.0f, 0.0f); // 多轴旋转看起来更立体
     shaderProgram.setUniformValue("model", model);
@@ -177,18 +138,35 @@ void znnwidget::paintGL()
 
     shaderProgram.setUniformValue("view", view);
     shaderProgram.setUniformValue("projection", projection);
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glBindVertexArray(VAO);
     switch (m_shape) {
     case Rect:
-        textureWall->bind();
         timer_1.start(10);
+
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+
         break;
     default:
         break;
     }
+    glBindVertexArray(0);
+    glUseProgram(0);
+    QPainter painter(this);
+    painter.setPen(Qt::white);
+    painter.setFont(QFont("Arial", 10));
+
+    for (const auto& v : vertices) {
+        QPoint screenPos = projectToScreen(v.position, model, view, projection);
+        painter.drawText(screenPos, QString("(%1,%2,%3)")
+                         .arg(v.position.x())
+                         .arg(v.position.y())
+                         .arg(v.position.z()));
+    }
+
+    painter.end();
 }
 
 void znnwidget::on_timeout()
