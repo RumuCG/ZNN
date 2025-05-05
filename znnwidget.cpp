@@ -1,13 +1,5 @@
 #include "znnwidget.h"
 unsigned int VBO,VAO,EBO;
-//VBO：存数据（What）
-//VAO：定义规则（How）
-//EBO: 重复顶点资源节省
-//绑定 VAO
-//绑定 VBO
-//上传数据到 VBO
-//设置顶点属性规则
-//解绑 VBO 和 VAO
 znnwidget::znnwidget(QWidget *parent) : QOpenGLWidget(parent)
 {
     setFocusPolicy(Qt::StrongFocus);
@@ -17,26 +9,6 @@ znnwidget::znnwidget(QWidget *parent) : QOpenGLWidget(parent)
 void znnwidget::drawshape(znnwidget::Shape shape)
 {
     m_shape = shape;
-    update();
-}
-
-void znnwidget::frameline(bool is_frame)
-{
-    makeCurrent();
-    if(is_frame)
-        glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-    else
-        glPolygonMode(GL_FRONT_AND_BACK,GL_FILL);
-    update();
-    doneCurrent();
-}
-
-void znnwidget::dy(bool is_dy)
-{
-    if(is_dy)
-        timer_1.start(100);
-    else
-        timer_1.stop();
     update();
 }
 
@@ -176,9 +148,6 @@ void znnwidget::on_timeout()
     makeCurrent();
     if(is_xc) angleZ += 2.0f;
     if (angleX >= 360.0f) angleZ -= 360.0f;
-
-    //shaderProgram.bind();
-
     doneCurrent();
     update();
 }

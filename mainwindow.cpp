@@ -6,9 +6,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     this->setStyleSheet("background-color: rgb(21, 160, 221);");  // 浅紫色（plum）
-
-
     ui->setupUi(this);
+    ui->openGLWidget->drawshape(znnwidget::Rect);
 
 }
 
@@ -19,23 +18,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actdrawrect_triggered()
 {
-    //  znnwidget::drawshape();
-    ui->openGLWidget->drawshape(znnwidget::Rect); // 调用接口
+   // to_be_continued -- 读入文件
 }
 
 void MainWindow::on_actclear_triggered()
 {
-    ui->openGLWidget->drawshape(znnwidget::None);
-}
-
-void MainWindow::on_actframe_triggered()
-{
-    ui->openGLWidget->frameline(ui->actframe->isChecked());
-}
-
-void MainWindow::on_actdy_triggered()
-{
-    ui->openGLWidget->dy(ui->actdy-> isChecked());
+    //ui->openGLWidget->drawshape(znnwidget::None);
 }
 
 void MainWindow::on_actxc_triggered()

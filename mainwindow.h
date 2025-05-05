@@ -19,17 +19,12 @@ private slots:
     void on_actdrawrect_triggered();
 
     void on_actclear_triggered();
-
-    void on_actframe_triggered();
-
-    void on_actdy_triggered();
-
     void on_actxc_triggered();
 
 
-    void on_horizontalSlider_valueChanged(int value);
+    void on_horizontalSlider_valueChanged(int value); //缩放滑杆
 
-    void on_horizontalSlider_2_valueChanged(int value);
+    void on_horizontalSlider_2_valueChanged(int value);  // 下面三个分别是 xyz的旋转滑杆
 
     void on_horizontalSlider_3_valueChanged(int value);
 
