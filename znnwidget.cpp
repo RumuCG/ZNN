@@ -51,16 +51,16 @@ void znnwidget::initializeGL()
     initializeOpenGLFunctions();
     vertices = {
         // 前面
-        {{-0.75f, -0.5f,  0.5f}, {1.0f, 1.0f, 1.0f}}, // 0
-        {{ 0.75f, -0.5f,  0.5f}, {1.0f, 1.0f, 1.0f}}, // 1
-        {{ 0.75f,  0.5f,  0.5f}, {1.0f, 1.0f, 1.0f}}, // 2
-        {{-0.75f,  0.5f,  0.5f}, {1.0f, 1.0f, 1.0f}}, // 3
+        {{-Axis_x, -Axis_y,  Axis_z}, {1.0f, 1.0f, 1.0f}}, // 0
+        {{ Axis_x, -Axis_y,  Axis_z}, {1.0f, 1.0f, 1.0f}}, // 1
+        {{ Axis_x,  Axis_y,  Axis_z}, {1.0f, 1.0f, 1.0f}}, // 2
+        {{-Axis_x,  Axis_y,  Axis_z}, {1.0f, 1.0f, 1.0f}}, // 3
 
         // 后面
-        {{-0.75f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}}, // 4
-        {{ 0.75f, -0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}}, // 5
-        {{ 0.75f,  0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}}, // 6
-        {{-0.75f,  0.5f, -0.5f}, {1.0f, 1.0f, 1.0f}}, // 7
+        {{-Axis_x, -Axis_y, -Axis_z}, {1.0f, 1.0f, 1.0f}}, // 4
+        {{ Axis_x, -Axis_y, -Axis_z}, {1.0f, 1.0f, 1.0f}}, // 5
+        {{ Axis_x,  Axis_y, -Axis_z}, {1.0f, 1.0f, 1.0f}}, // 6
+        {{-Axis_x,  Axis_y, -Axis_z}, {1.0f, 1.0f, 1.0f}}, // 7
     };
 
     glEnable(GL_DEPTH_TEST);
@@ -189,6 +189,49 @@ void znnwidget::paintGL()
                          .arg(v.position.z()));
     }
     painter.end();
+}
+
+// 调用完此函数后，在 update 中先绑定 Slice_VAO, 再 glDrawElements(GL_TRIANGLES, Slice_idx.size(), GL_UNSIGNED_INT, 0);
+void znnwidget::DrawPlane(unsigned st_x, unsigned st_y, unsigned st_z, unsigned en_x, unsigned en_y, unsigned en_z)
+{
+    // (x, y, z) -> ((num_y * num_z) * x + num_z * y + z)
+    unsigned d_fst = 0, d_sec = 0;
+    if (st_x == en_x) {
+        en_x++;
+        d_fst = num_z, d_sec = 1u;
+    }
+    else if (st_y == en_y) {
+        en_y++;
+        d_fst = num_y * num_z, d_sec = 1u;
+    }
+    else if (st_z == en_z) {
+        en_z++;
+        d_fst = num_y * num_z, d_sec = num_z;
+    }
+    else {
+        // 说明传入的不是一个平面
+
+        return;
+    }
+
+    Slice_idx.clear();
+    for (unsigned x = st_x; x < en_x; x++) {
+        for (unsigned y = st_y; y < en_y; y++) {
+            for (unsigned z = st_z; z < en_z; z++) {
+                unsigned base = (num_y * num_z) * x + num_z * y + z;
+                // 传入右上角和左下角两个三角形顶点在 Data_VBO 中的位置
+                Slice_idx << base << base + d_sec << base + d_fst + d_sec;
+                Slice_idx << base << base + d_fst << base + d_fst + d_sec;
+            }
+        }
+    }
+
+    Slice_VAO.bind();
+    Slice_EBO.bind();
+    Slice_EBO.allocate(Slice_idx.constData(), sizeof(unsigned) * (unsigned)(Slice_idx.size()));
+    Slice_VAO.release();
+
+    update();
 }
 
 void znnwidget::on_timeout()
