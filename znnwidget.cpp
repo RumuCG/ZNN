@@ -1,6 +1,10 @@
 #include "znnwidget.h"
 unsigned int VBO,VAO,EBO;
-znnwidget::znnwidget(QWidget *parent) : QOpenGLWidget(parent)
+znnwidget::znnwidget(QWidget *parent) :
+    QOpenGLWidget(parent),
+    Data_VBO(QOpenGLBuffer::VertexBuffer),      // 指定为vbo
+    Surface_EBO(QOpenGLBuffer::IndexBuffer),    // 指定为ebo
+    Slice_EBO(QOpenGLBuffer::IndexBuffer)       // 指定为ebo
 {
     setFocusPolicy(Qt::StrongFocus);
     connect(&timer_1,SIGNAL(timeout()),this,SLOT(on_timeout()));
@@ -85,6 +89,50 @@ void znnwidget::initializeGL()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     // 解绑 VAO（防止意外修改）
     glBindVertexArray(0);
+
+    // 初始化Data_VBO，这一步先不关联VAO
+    // 先上传空数据给GPU，在读入文件数据时重新 allocate
+    Data_VBO.create();
+    Data_VBO.bind();
+    Data_VBO.setUsagePattern(QOpenGLBuffer::StaticDraw); // 静态
+    Data_VBO.allocate(nullptr, 0); // 分配空数据
+    Data_VBO.release();
+
+    // 关联 Surface_VAO Data_VBO Surface_EBO
+    // Surface_EBO 在读入文件数据时重新 allocate
+    Surface_VAO.create();
+    Surface_VAO.bind();
+
+    Data_VBO.bind();
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(VertexData, position));
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(VertexData, color));
+    glEnableVertexAttribArray(1);
+
+    Surface_EBO.create();
+    Surface_EBO.bind();
+    Surface_EBO.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    Surface_EBO.allocate(nullptr, 0);
+    Data_VBO.release();
+    Surface_VAO.release();
+
+    // 关联 Slice_VAO Data_VBO Slice_EBO
+    // Slive_EBO 根据指定的平面重新确定
+    Slice_VAO.create();
+    Slice_VAO.bind();
+
+    Data_VBO.bind();
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(VertexData, position));
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(VertexData, color));
+    glEnableVertexAttribArray(1);
+
+    Slice_EBO.create();
+    Slice_EBO.bind();
+    Slice_EBO.setUsagePattern(QOpenGLBuffer::DynamicDraw); // 动态
+    Slice_EBO.allocate(nullptr, 0);
+    Data_VBO.release();
+    Slice_VAO.release();
 }
 
 void znnwidget::resizeGL(int w, int h)

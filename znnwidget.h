@@ -4,6 +4,8 @@
 #include<QOpenGLWidget>
 #include<QOpenGLFunctions_3_3_Core>
 #include<QOpenGLShaderProgram>
+#include<QOpenGLBuffer>
+#include<QOpenGLVertexArrayObject>
 #include<QTimer>
 #include<QTime>
 #include <QMatrix4x4>
@@ -46,7 +48,11 @@ private:
     QOpenGLShaderProgram shaderProgram;
     QTimer timer_1;
 
-
+    QOpenGLVertexArrayObject Surface_VAO, Slice_VAO;
+    QOpenGLBuffer Data_VBO;     // 静态数据，有序存储所有点的坐标和颜色
+    // 以下两个EBO共用上面一个VBO
+    QOpenGLBuffer Surface_EBO;  // 静态数据，用于画整个立方体（因为不涉及到裁剪之类的，所以当需要画立方体时，直接用这个不用重新找点）
+    QOpenGLBuffer Slice_EBO;    // 动态数据，用于画指定平面（因为平面是变化的，所以每次画平面都需要重新找点更新这个）
 public slots:
     void on_timeout();
 };
