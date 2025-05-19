@@ -44,6 +44,73 @@ QPoint znnwidget::projectToScreen(const QVector3D &worldPos, const QMatrix4x4 &m
     return QPoint(x, y);
 }
 
+// 4 * 4 * 4 的矩阵
+std::vector<VertexData> testData {
+    {{-0.5f, -0.25f, -0.25f}, {0.1f, 0.3f, 0.9f}},
+    {{-0.5f, -0.25f, -0.0833333f}, {0.4f, 0.7f, 0.2f}},
+    {{-0.5f, -0.25f, 0.0833333f}, {0.8f, 0.5f, 0.6f}},
+    {{-0.5f, -0.25f, 0.25f}, {0.2f, 0.1f, 0.4f}},
+    {{-0.5f, -0.0833333f, -0.25f}, {0.9f, 0.0f, 0.3f}},
+    {{-0.5f, -0.0833333f, -0.0833333f}, {0.5f, 0.5f, 0.5f}},
+    {{-0.5f, -0.0833333f, 0.0833333f}, {0.7f, 0.2f, 0.8f}},
+    {{-0.5f, -0.0833333f, 0.25f}, {0.3f, 0.6f, 0.1f}},
+    {{-0.5f, 0.0833333f, -0.25f}, {0.0f, 0.4f, 0.7f}},
+    {{-0.5f, 0.0833333f, -0.0833333f}, {0.6f, 0.9f, 0.2f}},
+    {{-0.5f, 0.0833333f, 0.0833333f}, {0.1f, 0.5f, 0.3f}},
+    {{-0.5f, 0.0833333f, 0.25f}, {0.8f, 0.1f, 0.6f}},
+    {{-0.5f, 0.25f, -0.25f}, {0.4f, 0.7f, 0.0f}},
+    {{-0.5f, 0.25f, -0.0833333f}, {0.3f, 0.2f, 0.5f}},
+    {{-0.5f, 0.25f, 0.0833333f}, {0.9f, 0.8f, 0.4f}},
+    {{-0.5f, 0.25f, 0.25f}, {0.5f, 0.3f, 0.7f}},
+    {{-0.166667f, -0.25f, -0.25f}, {0.2f, 0.6f, 0.1f}},
+    {{-0.166667f, -0.25f, -0.0833333f}, {0.7f, 0.4f, 0.9f}},
+    {{-0.166667f, -0.25f, 0.0833333f}, {0.0f, 0.8f, 0.5f}},
+    {{-0.166667f, -0.25f, 0.25f}, {0.3f, 0.1f, 0.6f}},
+    {{-0.166667f, -0.0833333f, -0.25f}, {0.5f, 0.7f, 0.2f}},
+    {{-0.166667f, -0.0833333f, -0.0833333f}, {0.8f, 0.3f, 0.4f}},
+    {{-0.166667f, -0.0833333f, 0.0833333f}, {0.1f, 0.9f, 0.0f}},
+    {{-0.166667f, -0.0833333f, 0.25f}, {0.6f, 0.5f, 0.7f}},
+    {{-0.166667f, 0.0833333f, -0.25f}, {0.4f, 0.2f, 0.8f}},
+    {{-0.166667f, 0.0833333f, -0.0833333f}, {0.9f, 0.6f, 0.1f}},
+    {{-0.166667f, 0.0833333f, 0.0833333f}, {0.2f, 0.7f, 0.3f}},
+    {{-0.166667f, 0.0833333f, 0.25f}, {0.5f, 0.0f, 0.9f}},
+    {{-0.166667f, 0.25f, -0.25f}, {0.7f, 0.1f, 0.4f}},
+    {{-0.166667f, 0.25f, -0.0833333f}, {0.3f, 0.8f, 0.6f}},
+    {{-0.166667f, 0.25f, 0.0833333f}, {0.6f, 0.4f, 0.2f}},
+    {{-0.166667f, 0.25f, 0.25f}, {0.1f, 0.5f, 0.7f}},
+    {{0.166667f, -0.25f, -0.25f}, {0.8f, 0.3f, 0.5f}},
+    {{0.166667f, -0.25f, -0.0833333f}, {0.4f, 0.9f, 0.1f}},
+    {{0.166667f, -0.25f, 0.0833333f}, {0.5f, 0.2f, 0.6f}},
+    {{0.166667f, -0.25f, 0.25f}, {0.9f, 0.7f, 0.0f}},
+    {{0.166667f, -0.0833333f, -0.25f}, {0.1f, 0.4f, 0.8f}},
+    {{0.166667f, -0.0833333f, -0.0833333f}, {0.6f, 0.3f, 0.5f}},
+    {{0.166667f, -0.0833333f, 0.0833333f}, {0.2f, 0.8f, 0.7f}},
+    {{0.166667f, -0.0833333f, 0.25f}, {0.7f, 0.5f, 0.3f}},
+    {{0.166667f, 0.0833333f, -0.25f}, {0.3f, 0.6f, 0.9f}},
+    {{0.166667f, 0.0833333f, -0.0833333f}, {0.5f, 0.1f, 0.4f}},
+    {{0.166667f, 0.0833333f, 0.0833333f}, {0.8f, 0.7f, 0.2f}},
+    {{0.166667f, 0.0833333f, 0.25f}, {0.0f, 0.5f, 0.6f}},
+    {{0.166667f, 0.25f, -0.25f}, {0.4f, 0.3f, 0.1f}},
+    {{0.166667f, 0.25f, -0.0833333f}, {0.9f, 0.8f, 0.5f}},
+    {{0.166667f, 0.25f, 0.0833333f}, {0.2f, 0.6f, 0.7f}},
+    {{0.166667f, 0.25f, 0.25f}, {0.7f, 0.4f, 0.0f}},
+    {{0.5f, -0.25f, -0.25f}, {0.6f, 0.1f, 0.5f}},
+    {{0.5f, -0.25f, -0.0833333f}, {0.3f, 0.7f, 0.8f}},
+    {{0.5f, -0.25f, 0.0833333f}, {0.5f, 0.9f, 0.2f}},
+    {{0.5f, -0.25f, 0.25f}, {0.8f, 0.0f, 0.4f}},
+    {{0.5f, -0.0833333f, -0.25f}, {0.1f, 0.5f, 0.6f}},
+    {{0.5f, -0.0833333f, -0.0833333f}, {0.4f, 0.2f, 0.9f}},
+    {{0.5f, -0.0833333f, 0.0833333f}, {0.7f, 0.3f, 0.1f}},
+    {{0.5f, -0.0833333f, 0.25f}, {0.0f, 0.8f, 0.5f}},
+    {{0.5f, 0.0833333f, -0.25f}, {0.9f, 0.6f, 0.3f}},
+    {{0.5f, 0.0833333f, -0.0833333f}, {0.2f, 0.4f, 0.7f}},
+    {{0.5f, 0.0833333f, 0.0833333f}, {0.5f, 0.1f, 0.8f}},
+    {{0.5f, 0.0833333f, 0.25f}, {0.6f, 0.5f, 0.0f}},
+    {{0.5f, 0.25f, -0.25f}, {0.3f, 0.9f, 0.4f}},
+    {{0.5f, 0.25f, -0.0833333f}, {0.8f, 0.2f, 0.5f}},
+    {{0.5f, 0.25f, 0.0833333f}, {0.1f, 0.7f, 0.6f}},
+    {{0.5f, 0.25f, 0.25f}, {0.4f, 0.0f, 0.9f}},
+};
 
 void znnwidget::initializeGL()
 {
@@ -96,6 +163,13 @@ void znnwidget::initializeGL()
     Data_VBO.bind();
     Data_VBO.setUsagePattern(QOpenGLBuffer::StaticDraw); // 静态
     Data_VBO.allocate(nullptr, 0); // 分配空数据
+
+    // << ---               testSlice               --- >>
+
+    Data_VBO.allocate(testData.data(), testData.size() * sizeof(VertexData));
+
+    // << ---               testSlice               --- >>
+
     Data_VBO.release();
 
     // 关联 Surface_VAO Data_VBO Surface_EBO
@@ -133,6 +207,13 @@ void znnwidget::initializeGL()
     Slice_EBO.allocate(nullptr, 0);
     Data_VBO.release();
     Slice_VAO.release();
+
+    // << ---               testSlice               --- >>
+
+    num_x = num_y = num_z = 4u;
+    DrawPlane(0u, 0u, 0u, 3u, 3u, 0u); // 改这里面的数据就好了，需要保证是平面，且在 [0, 4) 之间
+
+    // << ---               testSlice               --- >>
 }
 
 void znnwidget::resizeGL(int w, int h)
@@ -164,6 +245,14 @@ void znnwidget::paintGL()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    // << ---               testSlice               --- >>
+
+    Slice_VAO.bind();
+    glDrawElements(GL_TRIANGLES, Slice_idx.size(), GL_UNSIGNED_INT, 0);
+    Slice_VAO.release();
+
+    // << ---               testSlice               --- >>
+
     glBindVertexArray(VAO);
     switch (m_shape) {
     case Rect:
@@ -191,7 +280,7 @@ void znnwidget::paintGL()
     painter.end();
 }
 
-// 调用完此函数后，在 update 中先绑定 Slice_VAO, 再 glDrawElements(GL_TRIANGLES, Slice_idx.size(), GL_UNSIGNED_INT, 0);
+// 调用完此函数后，再 update 中先绑定 Slice_VAO, 再 glDrawElements(GL_TRIANGLES, Slice_idx.size(), GL_UNSIGNED_INT, 0);
 void znnwidget::DrawPlane(unsigned st_x, unsigned st_y, unsigned st_z, unsigned en_x, unsigned en_y, unsigned en_z)
 {
     // (x, y, z) -> ((num_y * num_z) * x + num_z * y + z)
@@ -230,6 +319,15 @@ void znnwidget::DrawPlane(unsigned st_x, unsigned st_y, unsigned st_z, unsigned 
     Slice_EBO.bind();
     Slice_EBO.allocate(Slice_idx.constData(), sizeof(unsigned) * (unsigned)(Slice_idx.size()));
     Slice_VAO.release();
+
+    // << ---               testSlice               --- >>
+
+    // 测试时把此函数放在 initializeGL() 末尾，不需要update（担心出问题）
+    if (true) {
+        return;
+    }
+
+    // << ---               testSlice               --- >>
 
     update();
 }
