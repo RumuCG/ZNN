@@ -38,14 +38,19 @@ public:
     bool is_xc = false;
     std::vector<VertexData> vertices;
     QPoint projectToScreen(const QVector3D &worldPos, const QMatrix4x4 &model, const QMatrix4x4 &view, const QMatrix4x4 &proj);
+    float intoout(float x,int p);
+    float outtoin(float x,int p);
+    unsigned num_x, num_y, num_z;
+    // 离散化后是一个 num_x * num_y * num_z 的三维数组，这三个值需要读入数据后算出
+    float min_[3] ={-0.5,-0.25,-0.25},max_[3] = {0.5,0.25,0.25};
+    // 0，1，2分别是x，y，z三个方向的最大最小值
 
-    unsigned num_x, num_y, num_z; // 离散化后是一个 num_x * num_y * num_z 的三维数组，这三个值需要读入数据后算出
     // 传入的 st 和 en 都是三维数组中的点，即在[ (0, 0, 0), (num_x, num_y, num_z) )里的整数坐标
     // 全闭 [st, en]
     void getPlaneIndex(unsigned st_x, unsigned st_y, unsigned st_z, unsigned en_x, unsigned en_y, unsigned en_z, QVector<unsigned> &idx);
     void getSurfaceIndex();
     void getSliceIndex(int type, unsigned l);
-
+    void gshDate(std::vector<VertexData>&);
     ~znnwidget();
 protected:
     virtual void initializeGL();

@@ -43,6 +43,18 @@ QPoint znnwidget::projectToScreen(const QVector3D &worldPos, const QMatrix4x4 &m
     return QPoint(x, y);
 }
 
+float znnwidget::intoout(float x,int p)
+{
+    if(p == 0) return (x - min_[p]) / (max_[p] - min_[p]) * 1.5 - 0.75;
+    else return (x - min_[p]) / (max_[p] - min_[p]) - 0.5;
+}
+
+float znnwidget::outtoin(float x, int p)
+{
+     if(p == 0) return ((x + 0.75) / 1.5) * (max_[p] - min_[p]) + min_[p];
+     else return ((x + 0.5) / 1.0) * (max_[p] - min_[p]) + min_[p];
+}
+
 // 4 * 4 * 4 的矩阵
 std::vector<VertexData> testData {
     {{-0.5f, -0.25f, -0.25f}, {0.1f, 0.3f, 0.9f}},
@@ -115,6 +127,7 @@ void znnwidget::initializeGL()
 {
     // 创建 VAO 和 VBO 和 EBO
     initializeOpenGLFunctions();
+    gshDate(testData);
     vertices = {
         // 前面
         {{-Axis_x, -Axis_y,  Axis_z}, {1.0f, 1.0f, 1.0f}}, // 0
@@ -272,9 +285,9 @@ void znnwidget::paintGL()
     for (const auto& v : vertices) {
         QPoint screenPos = projectToScreen(v.position, model, view, projection);
         painter.drawText(screenPos, QString("(%1,%2,%3)")
-                         .arg(v.position.x())
-                         .arg(v.position.y())
-                         .arg(v.position.z()));
+            .arg(outtoin(v.position.x(), 0), 0, 'f', 2)
+            .arg(outtoin(v.position.y(), 1), 0, 'f', 2)
+            .arg(outtoin(v.position.z(), 2), 0, 'f', 2));
     }
     painter.end();
 }
@@ -363,6 +376,15 @@ void znnwidget::getSliceIndex(int type, unsigned l)
     Slice_EBO.allocate(Slice_idx.constData(), sizeof(unsigned) * (unsigned)(Slice_idx.size()));
     doneCurrent();
     update();
+}
+
+void znnwidget::gshDate(std::vector<VertexData>& data)
+{
+    for (auto& v : data) {
+        v.position[0] = intoout(v.position[0],0);
+        v.position[1] = intoout(v.position[1],1);
+        v.position[2] = intoout(v.position[2],2);
+    }
 }
 
 void znnwidget::on_timeout()
