@@ -28,9 +28,9 @@ public:
     float offsetX = 0.0f;// 上移量
     float offsetY = 0.0f; // 下移量
     float scalen = 1.0f; // 缩放比例
-    enum Shape{None,Rect,Circle,Triangle};
+    enum Shape{ None, Surface, SliceXY, SliceXZ, SliceYZ, CntShape };
     explicit znnwidget(QWidget *parent = nullptr);
-    void drawshape(Shape shape);// 对外接口
+    void setShape(Shape shape);// 对外接口
     void frameline(bool is_frame);
     void dy(bool is_dy);
     void recover(); // 复原坐标系
@@ -42,9 +42,10 @@ public:
     unsigned num_x, num_y, num_z; // 离散化后是一个 num_x * num_y * num_z 的三维数组，这三个值需要读入数据后算出
     // 传入的 st 和 en 都是三维数组中的点，即在[ (0, 0, 0), (num_x, num_y, num_z) )里的整数坐标
     // 全闭 [st, en]
-    void DrawPlane(unsigned st_x, unsigned st_y, unsigned st_z, unsigned en_x, unsigned en_y, unsigned en_z);
-    void test();
-    void release();
+    void getPlaneIndex(unsigned st_x, unsigned st_y, unsigned st_z, unsigned en_x, unsigned en_y, unsigned en_z, QVector<unsigned> &idx);
+    void getSurfaceIndex();
+    void getSliceIndex(int type, unsigned l);
+
     ~znnwidget();
 protected:
     virtual void initializeGL();

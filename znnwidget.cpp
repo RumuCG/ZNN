@@ -10,10 +10,9 @@ znnwidget::znnwidget(QWidget *parent) :
     connect(&timer_1,SIGNAL(timeout()),this,SLOT(on_timeout()));
 }
 
-void znnwidget::drawshape(znnwidget::Shape shape)
+void znnwidget::setShape(znnwidget::Shape shape)
 {
     m_shape = shape;
-    update();
 }
 
 void znnwidget::recover()
@@ -166,6 +165,7 @@ void znnwidget::initializeGL()
 
     // << ---               testSlice               --- >>
 
+    num_x = num_y = num_z = 4u;
     Data_VBO.allocate(testData.data(), testData.size() * sizeof(VertexData));
 
     // << ---               testSlice               --- >>
@@ -207,13 +207,6 @@ void znnwidget::initializeGL()
     Slice_EBO.allocate(nullptr, 0);
     Data_VBO.release();
     Slice_VAO.release();
-
-    // << ---               testSlice               --- >>
-
-    //num_x = num_y = num_z = 4u;
-    //DrawPlane(0u, 0u, 0u, 3u, 3u, 0u); // 改这里面的数据就好了，需要保证是平面，且在 [0, 4) 之间
-
-    // << ---               testSlice               --- >>
 }
 
 void znnwidget::resizeGL(int w, int h)
@@ -245,27 +238,33 @@ void znnwidget::paintGL()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    // << ---               testSlice               --- >>
-
-    Slice_VAO.bind();
-    glDrawElements(GL_TRIANGLES, Slice_idx.size(), GL_UNSIGNED_INT, 0);
-    Slice_VAO.release();
-
-    // << ---               testSlice               --- >>
-
-    glBindVertexArray(VAO);
     switch (m_shape) {
-    case Rect:
-        timer_1.start(10);
+    case None:
 
-        glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);
+        break;
+    case Surface:
+
+        Surface_VAO.bind();
+        glDrawElements(GL_TRIANGLES, Surface_idx.size(), GL_UNSIGNED_INT, 0);
+        Surface_VAO.release();
 
         break;
     default:
+
+        Slice_VAO.bind();
+        glDrawElements(GL_TRIANGLES, Slice_idx.size(), GL_UNSIGNED_INT, 0);
+        Slice_VAO.release();
+
         break;
     }
+
+    // 画系
+    glBindVertexArray(VAO);
+    timer_1.start(10);
+    glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);
     glBindVertexArray(0);
     glUseProgram(0);
+
     QPainter painter(this);
     painter.setPen(Qt::white);
     painter.setFont(QFont("Arial", 10));
@@ -281,7 +280,7 @@ void znnwidget::paintGL()
 }
 
 // 调用完此函数后，再 update 中先绑定 Slice_VAO, 再 glDrawElements(GL_TRIANGLES, Slice_idx.size(), GL_UNSIGNED_INT, 0);
-void znnwidget::DrawPlane(unsigned st_x, unsigned st_y, unsigned st_z, unsigned en_x, unsigned en_y, unsigned en_z)
+void znnwidget::getPlaneIndex(unsigned st_x, unsigned st_y, unsigned st_z, unsigned en_x, unsigned en_y, unsigned en_z, QVector<unsigned> &idx)
 {
     // (x, y, z) -> ((num_y * num_z) * x + num_z * y + z)
     unsigned d_fst = 0, d_sec = 0;
@@ -309,49 +308,59 @@ void znnwidget::DrawPlane(unsigned st_x, unsigned st_y, unsigned st_z, unsigned 
             for (unsigned z = st_z; z < en_z; z++) {
                 unsigned base = (num_y * num_z) * x + num_z * y + z;
                 // 传入右上角和左下角两个三角形顶点在 Data_VBO 中的位置
-                Slice_idx << base << base + d_sec << base + d_fst + d_sec;
-                Slice_idx << base << base + d_fst << base + d_fst + d_sec;
+                idx << base << base + d_sec << base + d_fst + d_sec;
+                idx << base << base + d_fst << base + d_fst + d_sec;
             }
         }
     }
+}
 
-
-
-    // << ---               testSlice               --- >>
-
-    // 测试时把此函数放在 initializeGL() 末尾，不需要update（担心出问题）
-    if (true) {
+void znnwidget::getSurfaceIndex()
+{
+    if (not Surface_idx.empty()) {
         return;
     }
 
-    // << ---               testSlice               --- >>
-
-    update();
-}
-
-void znnwidget::test()
-{
     makeCurrent();
-    num_x = num_y = num_z = 4u;
-    DrawPlane(0u, 0u, 0u, 3u, 3u, 0u);
-    DrawPlane(0u, 0u, 0u, 3u, 0u, 3u);
-    DrawPlane(0u, 0u, 0u, 0u, 3u, 3u);
-    DrawPlane(3u, 0u, 0u, 3u, 3u, 3u);
-    DrawPlane(0u, 3u, 0u, 3u, 3u, 3u);
-    DrawPlane(0u, 0u, 3u, 3u, 3u, 3u);
+    Surface_idx.clear();
+    getPlaneIndex(0u, 0u, 0u, num_x - 1, num_y - 1, 0u, Surface_idx);
+    getPlaneIndex(0u, 0u, 0u, num_x - 1, 0u, num_z - 1, Surface_idx);
+    getPlaneIndex(0u, 0u, 0u, 0u, num_y - 1, num_z - 1, Surface_idx);
+    getPlaneIndex(num_x - 1, 0u, 0u, num_x - 1, num_y - 1, num_z - 1, Surface_idx);
+    getPlaneIndex(0u, num_y - 1, 0u, num_x - 1, num_y - 1, num_z - 1, Surface_idx);
+    getPlaneIndex(0u, 0u, num_z - 1, num_x - 1, num_y - 1, num_z - 1, Surface_idx);
 
-    Slice_VAO.bind();
-    Slice_EBO.bind();
-    Slice_EBO.allocate(Slice_idx.constData(), sizeof(unsigned) * (unsigned)(Slice_idx.size()));
-    Slice_VAO.release();
+    Surface_VAO.bind();
+    Surface_EBO.bind();
+    Surface_EBO.allocate(Surface_idx.constData(), sizeof(unsigned) * (unsigned)(Surface_idx.size()));
+    Surface_VAO.release();
     doneCurrent();
     update();
 }
 
-void znnwidget::release()
+void znnwidget::getSliceIndex(int type, unsigned l)
 {
     makeCurrent();
+
     Slice_idx.clear();
+
+    switch (type) { // 保持跟下拉框中的序号一致
+    case 2:         // 沿 X 轴方向移动的 YZ 平面
+        getPlaneIndex(l, 0u, 0u, l, num_y - 1, num_z - 1, Slice_idx);
+        break;
+    case 3:         // 沿 Y 轴方向移动的 XZ 平面
+        getPlaneIndex(0u, l, 0u, num_x - 1, l, num_z - 1, Slice_idx);
+        break;
+    case 4:         // 沿 Z 轴方向移动的 XY 平面
+        getPlaneIndex(0u, 0u, l, num_x - 1, num_y - 1, l, Slice_idx);
+        break;
+    default:
+        break;
+    }
+
+    Slice_VAO.bind();
+    Slice_EBO.bind();
+    Slice_EBO.allocate(Slice_idx.constData(), sizeof(unsigned) * (unsigned)(Slice_idx.size()));
     doneCurrent();
     update();
 }

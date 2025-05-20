@@ -7,8 +7,6 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     this->setStyleSheet("background-color: rgb(21, 160, 221);");  // 浅紫色（plum）
     ui->setupUi(this);
-    ui->openGLWidget->drawshape(znnwidget::Rect);
-
 }
 
 MainWindow::~MainWindow()
@@ -18,13 +16,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actdrawrect_triggered()
 {
-   // to_be_continued -- 读入文件
-    ui->openGLWidget->test();
+
 }
 
 void MainWindow::on_actclear_triggered()
 {
-    ui->openGLWidget->release();
+
 }
 
 void MainWindow::on_actxc_triggered()
@@ -67,4 +64,46 @@ void MainWindow::on_recover_button_clicked()
     ui->horizontalSlider_3->setValue(0);
     ui->horizontalSlider_4->setValue(0);
     update();
+}
+
+void MainWindow::on_DisplayMode_currentIndexChanged(int index)
+{
+    bool enable = (index > 1);
+    ui->PostionSlider->setEnabled(enable);
+    ui->PositionBox->setEnabled(enable);
+
+    switch (index) {
+    case 0:             // NULL 啥都不显示
+
+        ui->openGLWidget->setShape(ui->openGLWidget->None);
+        ui->openGLWidget->update();
+
+        break;
+    case 1:             // A 显示全部 6 个面
+
+        ui->openGLWidget->setShape(ui->openGLWidget->Surface);
+        ui->openGLWidget->getSurfaceIndex();
+
+        break;
+    case 2:             // X 沿X轴显示切片
+
+        ui->openGLWidget->setShape(ui->openGLWidget->SliceYZ);
+        ui->openGLWidget->getSliceIndex(2, 0u);
+
+        break;
+    case 3:             // Y 沿Y轴显示切片
+
+        ui->openGLWidget->setShape(ui->openGLWidget->SliceXZ);
+        ui->openGLWidget->getSliceIndex(3, 0u);
+
+        break;
+    case 4:             // Z 沿Z轴显示切片
+
+        ui->openGLWidget->setShape(ui->openGLWidget->SliceXY);
+        ui->openGLWidget->getSliceIndex(4, 0u);
+
+        break;
+    default:
+        break;
+    }
 }

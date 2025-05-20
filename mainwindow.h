@@ -32,6 +32,8 @@ private slots:
 
     void on_recover_button_clicked();
 
+    void on_DisplayMode_currentIndexChanged(int index);
+
 private:
     Ui::MainWindow *ui;
 };
