@@ -19,11 +19,12 @@ MainWindow::~MainWindow()
 void MainWindow::on_actdrawrect_triggered()
 {
    // to_be_continued -- 读入文件
+    ui->openGLWidget->test();
 }
 
 void MainWindow::on_actclear_triggered()
 {
-    //ui->openGLWidget->drawshape(znnwidget::None);
+    ui->openGLWidget->release();
 }
 
 void MainWindow::on_actxc_triggered()

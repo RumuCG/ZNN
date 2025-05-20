@@ -210,8 +210,8 @@ void znnwidget::initializeGL()
 
     // << ---               testSlice               --- >>
 
-    num_x = num_y = num_z = 4u;
-    DrawPlane(0u, 0u, 0u, 3u, 3u, 0u); // 改这里面的数据就好了，需要保证是平面，且在 [0, 4) 之间
+    //num_x = num_y = num_z = 4u;
+    //DrawPlane(0u, 0u, 0u, 3u, 3u, 0u); // 改这里面的数据就好了，需要保证是平面，且在 [0, 4) 之间
 
     // << ---               testSlice               --- >>
 }
@@ -226,7 +226,7 @@ void znnwidget::paintGL()
 {
     glClearColor(0.0f, 0.0f, 0.0f, 5.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-
+    glEnable(GL_DEPTH_TEST);
     shaderProgram.bind();
     QMatrix4x4 model;
     model.scale(scalen);  // 放大
@@ -299,11 +299,11 @@ void znnwidget::DrawPlane(unsigned st_x, unsigned st_y, unsigned st_z, unsigned 
     }
     else {
         // 说明传入的不是一个平面
-
+        qDebug() << "error plane";
         return;
     }
 
-    Slice_idx.clear();
+    //Slice_idx.clear();
     for (unsigned x = st_x; x < en_x; x++) {
         for (unsigned y = st_y; y < en_y; y++) {
             for (unsigned z = st_z; z < en_z; z++) {
@@ -315,10 +315,7 @@ void znnwidget::DrawPlane(unsigned st_x, unsigned st_y, unsigned st_z, unsigned 
         }
     }
 
-    Slice_VAO.bind();
-    Slice_EBO.bind();
-    Slice_EBO.allocate(Slice_idx.constData(), sizeof(unsigned) * (unsigned)(Slice_idx.size()));
-    Slice_VAO.release();
+
 
     // << ---               testSlice               --- >>
 
@@ -329,6 +326,33 @@ void znnwidget::DrawPlane(unsigned st_x, unsigned st_y, unsigned st_z, unsigned 
 
     // << ---               testSlice               --- >>
 
+    update();
+}
+
+void znnwidget::test()
+{
+    makeCurrent();
+    num_x = num_y = num_z = 4u;
+    DrawPlane(0u, 0u, 0u, 3u, 3u, 0u);
+    DrawPlane(0u, 0u, 0u, 3u, 0u, 3u);
+    DrawPlane(0u, 0u, 0u, 0u, 3u, 3u);
+    DrawPlane(3u, 0u, 0u, 3u, 3u, 3u);
+    DrawPlane(0u, 3u, 0u, 3u, 3u, 3u);
+    DrawPlane(0u, 0u, 3u, 3u, 3u, 3u);
+
+    Slice_VAO.bind();
+    Slice_EBO.bind();
+    Slice_EBO.allocate(Slice_idx.constData(), sizeof(unsigned) * (unsigned)(Slice_idx.size()));
+    Slice_VAO.release();
+    doneCurrent();
+    update();
+}
+
+void znnwidget::release()
+{
+    makeCurrent();
+    Slice_idx.clear();
+    doneCurrent();
     update();
 }
 
