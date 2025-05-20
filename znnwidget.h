@@ -43,7 +43,8 @@ public:
     // 传入的 st 和 en 都是三维数组中的点，即在[ (0, 0, 0), (num_x, num_y, num_z) )里的整数坐标
     // 全闭 [st, en]
     void DrawPlane(unsigned st_x, unsigned st_y, unsigned st_z, unsigned en_x, unsigned en_y, unsigned en_z);
-
+    void test();
+    void release();
     ~znnwidget();
 protected:
     virtual void initializeGL();
