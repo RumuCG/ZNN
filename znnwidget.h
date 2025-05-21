@@ -1,3 +1,4 @@
+
 #ifndef ZNNWIDGET_H
 #define ZNNWIDGET_H
 #include <QWidget>
@@ -51,6 +52,8 @@ public:
     void getSurfaceIndex();
     void getSliceIndex(int type, unsigned l);
     void gshDate(std::vector<VertexData>&);
+    void gshzb();
+    std::vector<VertexData> getEdgeVertices(const std::vector<VertexData>& data, int Nx, int Ny, int Nz);
     ~znnwidget();
 protected:
     virtual void initializeGL();
@@ -58,11 +61,10 @@ protected:
     virtual void paintGL();
 signals:
 private:
-    static constexpr float Axis_x = 0.75f, Axis_y = 0.5f, Axis_z = 0.5f; // 轴的范围
+    float Axis_x = 0.75f, Axis_y = 0.5f, Axis_z = 0.5f; // 轴的范围
     Shape m_shape;//保存需要绘制的图像
     QOpenGLShaderProgram shaderProgram;
     QTimer timer_1;
-
     QOpenGLVertexArrayObject Surface_VAO, Slice_VAO;
     QOpenGLBuffer Data_VBO;     // 静态数据，有序存储所有点的坐标和颜色
     // 以下两个EBO共用上面一个VBO

@@ -34,6 +34,10 @@ private slots:
 
     void on_DisplayMode_currentIndexChanged(int index);
 
+    void on_PostionSlider_sliderMoved(int position);
+
+    void on_PostionSlider_valueChanged(int value);
+
 private:
     Ui::MainWindow *ui;
 };

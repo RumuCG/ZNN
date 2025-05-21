@@ -8,6 +8,7 @@ znnwidget::znnwidget(QWidget *parent) :
 {
     setFocusPolicy(Qt::StrongFocus);
     connect(&timer_1,SIGNAL(timeout()),this,SLOT(on_timeout()));
+    gshzb();
 }
 
 void znnwidget::setShape(znnwidget::Shape shape)
@@ -35,24 +36,31 @@ unsigned int indices[] = {
 //下面的函数用来计算坐标系的投影位置
 QPoint znnwidget::projectToScreen(const QVector3D &worldPos, const QMatrix4x4 &model, const QMatrix4x4 &view, const QMatrix4x4 &proj)
 {
-    QVector4D clipSpacePos = proj * view * model * QVector4D(worldPos, 1.0f);
+
+    QVector4D eyePos = view * model * QVector4D(worldPos, 1.0f);
+    if (eyePos.z() >= 0.0f)  // 在相机后面，忽略
+        return QPoint(-1000, -1000);
+    QVector4D clipSpacePos = proj * eyePos;
     if (clipSpacePos.w() == 0.0f) return QPoint(-1000, -1000); // 防止除以0
     QVector3D ndc = clipSpacePos.toVector3DAffine(); // 归一化设备坐标
+    if (ndc.x() < -1 || ndc.x() > 1 || ndc.y() < -1 || ndc.y() > 1 || ndc.z() < -1 || ndc.z() > 1)
+        return QPoint(-1000, -1000); // 超出视锥，忽略
     int x = int((ndc.x() * 0.5f + 0.5f) * width());
-    int y = int((1.0f - (ndc.y() * 0.5f + 0.5f)) * height()); // 注意Y轴反过来
+    int y = int((1.0f - (ndc.y() * 0.5f + 0.5f)) * height()); // Y轴反转
     return QPoint(x, y);
 }
 
 float znnwidget::intoout(float x,int p)
 {
-    if(p == 0) return (x - min_[p]) / (max_[p] - min_[p]) * 1.5 - 0.75;
-    else return (x - min_[p]) / (max_[p] - min_[p]) - 0.5;
+    if(p == 0) return (x - min_[p]) / (max_[p] - min_[p]) * 2 * Axis_x - Axis_x;
+    else if(p == 1) return (x - min_[p]) / (max_[p] - min_[p]) * 2 * Axis_y - Axis_y;
+    else return (x - min_[p]) / (max_[p] - min_[p]) * 2 * Axis_z - Axis_z;
 }
-
 float znnwidget::outtoin(float x, int p)
 {
-     if(p == 0) return ((x + 0.75) / 1.5) * (max_[p] - min_[p]) + min_[p];
-     else return ((x + 0.5) / 1.0) * (max_[p] - min_[p]) + min_[p];
+    if(p == 0) return ((x + Axis_x) / (2 * Axis_x)) * (max_[p] - min_[p]) + min_[p];
+    else if(p == 1) return ((x + Axis_y) / (2 * Axis_y)) * (max_[p] - min_[p]) + min_[p];
+    else return ((x + Axis_z) / (2 * Axis_z)) * (max_[p] - min_[p]) + min_[p];
 }
 
 // 4 * 4 * 4 的矩阵
@@ -123,11 +131,11 @@ std::vector<VertexData> testData {
     {{0.5f, 0.25f, 0.25f}, {0.4f, 0.0f, 0.9f}},
 };
 
-void znnwidget::initializeGL()
-{
+void znnwidget::initializeGL(){
     // 创建 VAO 和 VBO 和 EBO
     initializeOpenGLFunctions();
     gshDate(testData);
+
     vertices = {
         // 前面
         {{-Axis_x, -Axis_y,  Axis_z}, {1.0f, 1.0f, 1.0f}}, // 0
@@ -279,16 +287,33 @@ void znnwidget::paintGL()
     glUseProgram(0);
 
     QPainter painter(this);
-    painter.setPen(Qt::white);
+    painter.setPen(Qt::red);
     painter.setFont(QFont("Arial", 10));
-
+    int count = 0;
+    for (const auto& v : getEdgeVertices(testData,num_x,num_y,num_z)) {
+        QVector4D worldPos(v.position, 1.0f);
+        QVector4D clipPos = projection * view * model * worldPos;
+        clipPos /= clipPos.w();
+        if (clipPos.z() < -1.0f || clipPos.z() > 1.0f) continue;
+        if (clipPos.x() < -1.0f || clipPos.x() > 1.0f ||
+                clipPos.y() < -1.0f || clipPos.y() > 1.0f) continue;
+        QPoint screenPos = projectToScreen(v.position, model, view, projection);
+        if(count < 4 * num_x - 4) painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.x(), 0), 0, 'f', 2));
+        else if(count < 4*num_x + 4 * num_y - 8) painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.y(), 0), 0, 'f', 2));
+        else painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.z(), 0), 0, 'f', 2));
+        ++count;
+    }
+    painter.setPen(Qt::white);
     for (const auto& v : vertices) {
         QPoint screenPos = projectToScreen(v.position, model, view, projection);
+        if (screenPos == QPoint(-1000, -1000)) continue;
         painter.drawText(screenPos, QString("(%1,%2,%3)")
-            .arg(outtoin(v.position.x(), 0), 0, 'f', 2)
-            .arg(outtoin(v.position.y(), 1), 0, 'f', 2)
-            .arg(outtoin(v.position.z(), 2), 0, 'f', 2));
+                         .arg(outtoin(v.position.x(), 0), 0, 'f', 2)
+                         .arg(outtoin(v.position.y(), 1), 0, 'f', 2)
+                         .arg(outtoin(v.position.z(), 2), 0, 'f', 2));
     }
+
+
     painter.end();
 }
 
@@ -386,6 +411,54 @@ void znnwidget::gshDate(std::vector<VertexData>& data)
         v.position[2] = intoout(v.position[2],2);
     }
 }
+
+void znnwidget::gshzb()
+{
+    float range[3];      // 保存每一对的范围
+    float scale[3];      // 保存归一化后的比例
+    // 计算每一对的差值
+    for (int i = 0; i < 3; ++i) {
+        range[i] = max_[i] - min_[i];
+    }
+    // 找出最大范围值
+    double max_range = std::max({range[0], range[1], range[2]});
+    // 按比例归一化，最大者为 1，其他按比例缩放
+    Axis_x = range[0] / max_range;
+    Axis_y = range[1] / max_range;
+    Axis_z = range[2] / max_range;
+}
+
+std::vector<VertexData> znnwidget::getEdgeVertices(const std::vector<VertexData> &data, int Nx, int Ny, int Nz)
+{
+    std::vector<VertexData> result;
+
+    // x方向边（4条），跳过 x = 0 和 x = Nx-1
+    for (int x = 1; x < Nx - 1; ++x) {
+        result.push_back(data[x * Ny * Nz + 0 * Nz + 0]);                  // (x, 0, 0)
+        result.push_back(data[x * Ny * Nz + (Ny - 1) * Nz + 0]);          // (x, Ny-1, 0)
+        result.push_back(data[x * Ny * Nz + 0 * Nz + (Nz - 1)]);          // (x, 0, Nz-1)
+        result.push_back(data[x * Ny * Nz + (Ny - 1) * Nz + (Nz - 1)]);   // (x, Ny-1, Nz-1)
+    }
+
+    // y方向边（4条），跳过 y = 0 和 y = Ny-1
+    for (int y = 1; y < Ny - 1; ++y) {
+        result.push_back(data[0 * Ny * Nz + y * Nz + 0]);                 // (0, y, 0)
+        result.push_back(data[(Nx - 1) * Ny * Nz + y * Nz + 0]);          // (Nx-1, y, 0)
+        result.push_back(data[0 * Ny * Nz + y * Nz + (Nz - 1)]);          // (0, y, Nz-1)
+        result.push_back(data[(Nx - 1) * Ny * Nz + y * Nz + (Nz - 1)]);   // (Nx-1, y, Nz-1)
+    }
+
+    // z方向边（4条），跳过 z = 0 和 z = Nz-1
+    for (int z = 1; z < Nz - 1; ++z) {
+        result.push_back(data[0 * Ny * Nz + 0 * Nz + z]);                 // (0, 0, z)
+        result.push_back(data[0 * Ny * Nz + (Ny - 1) * Nz + z]);          // (0, Ny-1, z)
+        result.push_back(data[(Nx - 1) * Ny * Nz + 0 * Nz + z]);          // (Nx-1, 0, z)
+        result.push_back(data[(Nx - 1) * Ny * Nz + (Ny - 1) * Nz + z]);   // (Nx-1, Ny-1, z)
+    }
+
+    return result;
+}
+
 
 void znnwidget::on_timeout()
 {
