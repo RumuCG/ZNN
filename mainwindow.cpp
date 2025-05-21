@@ -1,12 +1,15 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QVBoxLayout>
+#include "vertexdata.h"
+#include <fstream>
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     this->setStyleSheet("background-color: rgb(21, 160, 221);");  // 浅紫色（plum）
     ui->setupUi(this);
+
 }
 
 MainWindow::~MainWindow()
@@ -16,7 +19,8 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actdrawrect_triggered()
 {
-
+    QString path = QCoreApplication::applicationDirPath() + "/input.bin";
+    fileRead = readFile(path);
 }
 
 void MainWindow::on_actclear_triggered()
@@ -72,13 +76,15 @@ void MainWindow::on_DisplayMode_currentIndexChanged(int index)
     ui->PostionSlider->setEnabled(enable);
     ui->PositionBox->setEnabled(enable);
 
-    switch (index) {
-    case 0:             // NULL 啥都不显示
+    if (index == 0) {   // NULL 啥都不干
         ui->PostionSlider->setValue(0);
         ui->openGLWidget->setShape(ui->openGLWidget->None);
         ui->openGLWidget->update();
-
-        break;
+    }
+    else if (not fileRead) { // 未读入文件时，禁止选择其他选项
+        ui->DisplayMode->setCurrentIndex(0);
+    }
+    switch (index) {
     case 1:             // A 显示全部 6 个面
         ui->PostionSlider->setValue(0);
         ui->openGLWidget->setShape(ui->openGLWidget->Surface);
@@ -119,18 +125,6 @@ void MainWindow::on_PostionSlider_valueChanged(int p)
 {
     int index = ui->DisplayMode->currentIndex();
     switch (index) {
-    case 0:             // NULL 啥都不显示
-        //ui->PostionSlider->setValue(0);
-        ui->openGLWidget->setShape(ui->openGLWidget->None);
-        ui->openGLWidget->update();
-
-        break;
-    case 1:             // A 显示全部 6 个面
-        //ui->PostionSlider->setValue(0);
-        ui->openGLWidget->setShape(ui->openGLWidget->Surface);
-        ui->openGLWidget->getSurfaceIndex();
-
-        break;
     case 2:             // X 沿X轴显示切片
         //ui->PostionSlider->setValue(0);
         ui->openGLWidget->setShape(ui->openGLWidget->SliceYZ);
@@ -152,4 +146,69 @@ void MainWindow::on_PostionSlider_valueChanged(int p)
     default:
         break;
     }
+}
+
+bool MainWindow::readFile(const QString &FileName)
+{
+//    qDebug() << "reading File\n";
+//    // 以只读方式打开数据文件
+//    QFile dataFile(FileName);
+//    qDebug() << "ready to read " << FileName << '\n';
+//    if (not dataFile.open(QIODevice::ReadOnly)) {
+//        qDebug() << "Fail to read File " << FileName << '\n';
+//        return false;
+//    }
+
+    ui->openGLWidget->resetData();
+
+//    QDataStream dataSrc(&dataFile);
+//    dataSrc.setVersion(QDataStream::Qt_5_9);
+//    dataSrc >> d_min >> d_max; // 开头一行是最小值和最大值
+//    qDebug() << d_min << ' ' << d_max << '\n';
+//    if (d_min != 3000.0f) {
+//        exit(1);
+//    }
+//    else {
+//        qDebug() << "read successfully!\n";
+//    }
+
+    std::ifstream dataSrc(FileName.toStdString(), std::ios::binary);
+    float d;
+    dataSrc.read(reinterpret_cast<char*>(&d), sizeof(float));
+    d_min = 4000.0f;
+    dataSrc.read(reinterpret_cast<char*>(&d), sizeof(float));
+    d_max = 4500.0f;
+    if (d != 5000.0f) {
+        qDebug() << d << ' ' << "Fail to read\n";
+        exit(0);
+    }
+
+    // 以下参数都是我们写给配置文件的参数，是已知的
+    // 由于还未实现创建配置文件与差值程序交互，这里先用测试文件的参数
+    int x = 250, y = 250, z = 175;
+    ui->openGLWidget->modelData.reserve(x * y * z);
+    float x_min = -5000.0f, y_min = -5000.0f, z_min = 0.0f;
+    float x_d = 40.0f, y_d = 40.0f, z_d = 40.0f;
+    int id = 0;
+    for (int i = 0; i < x; i++) {
+        if (i % 50 == 0) {
+            qDebug() << i << "-th reading\n";
+        }
+        for (int j = 0; j < y; j++) {
+            for (int k = 0; k < z; k++) {
+                dataSrc.read(reinterpret_cast<char*>(&d), sizeof(float));
+                VertexData node(x_min + i * x_d, y_min + j * y_d, z_min + k * z_d);
+                node.setColor(d, d_min, d_max);
+                ui->openGLWidget->modelData.push_back(node);
+            }
+        }
+    }
+
+    qDebug() << "File read ok !\n";
+//    exit(1);
+
+    ui->openGLWidget->processData();
+
+//    dataFile.close();
+    return true;
 }

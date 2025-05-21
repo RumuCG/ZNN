@@ -31,7 +31,8 @@ SOURCES += \
 
 HEADERS += \
         mainwindow.h \
-    znnwidget.h
+    znnwidget.h \
+    vertexdata.h
 
 FORMS += \
         mainwindow.ui

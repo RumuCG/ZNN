@@ -1,7 +1,8 @@
 #include "znnwidget.h"
-unsigned int VBO,VAO,EBO;
 znnwidget::znnwidget(QWidget *parent) :
     QOpenGLWidget(parent),
+    Axis_VBO(QOpenGLBuffer::VertexBuffer),      // 指定为vbo
+    Axis_EBO(QOpenGLBuffer::IndexBuffer),       // 指定为ebo
     Data_VBO(QOpenGLBuffer::VertexBuffer),      // 指定为vbo
     Surface_EBO(QOpenGLBuffer::IndexBuffer),    // 指定为ebo
     Slice_EBO(QOpenGLBuffer::IndexBuffer)       // 指定为ebo
@@ -64,132 +65,115 @@ float znnwidget::outtoin(float x, int p)
 }
 
 // 4 * 4 * 4 的矩阵
-std::vector<VertexData> testData {
-    {{-0.5f, -0.25f, -0.25f}, {0.1f, 0.3f, 0.9f}},
-    {{-0.5f, -0.25f, -0.0833333f}, {0.4f, 0.7f, 0.2f}},
-    {{-0.5f, -0.25f, 0.0833333f}, {0.8f, 0.5f, 0.6f}},
-    {{-0.5f, -0.25f, 0.25f}, {0.2f, 0.1f, 0.4f}},
-    {{-0.5f, -0.0833333f, -0.25f}, {0.9f, 0.0f, 0.3f}},
-    {{-0.5f, -0.0833333f, -0.0833333f}, {0.5f, 0.5f, 0.5f}},
-    {{-0.5f, -0.0833333f, 0.0833333f}, {0.7f, 0.2f, 0.8f}},
-    {{-0.5f, -0.0833333f, 0.25f}, {0.3f, 0.6f, 0.1f}},
-    {{-0.5f, 0.0833333f, -0.25f}, {0.0f, 0.4f, 0.7f}},
-    {{-0.5f, 0.0833333f, -0.0833333f}, {0.6f, 0.9f, 0.2f}},
-    {{-0.5f, 0.0833333f, 0.0833333f}, {0.1f, 0.5f, 0.3f}},
-    {{-0.5f, 0.0833333f, 0.25f}, {0.8f, 0.1f, 0.6f}},
-    {{-0.5f, 0.25f, -0.25f}, {0.4f, 0.7f, 0.0f}},
-    {{-0.5f, 0.25f, -0.0833333f}, {0.3f, 0.2f, 0.5f}},
-    {{-0.5f, 0.25f, 0.0833333f}, {0.9f, 0.8f, 0.4f}},
-    {{-0.5f, 0.25f, 0.25f}, {0.5f, 0.3f, 0.7f}},
-    {{-0.166667f, -0.25f, -0.25f}, {0.2f, 0.6f, 0.1f}},
-    {{-0.166667f, -0.25f, -0.0833333f}, {0.7f, 0.4f, 0.9f}},
-    {{-0.166667f, -0.25f, 0.0833333f}, {0.0f, 0.8f, 0.5f}},
-    {{-0.166667f, -0.25f, 0.25f}, {0.3f, 0.1f, 0.6f}},
-    {{-0.166667f, -0.0833333f, -0.25f}, {0.5f, 0.7f, 0.2f}},
-    {{-0.166667f, -0.0833333f, -0.0833333f}, {0.8f, 0.3f, 0.4f}},
-    {{-0.166667f, -0.0833333f, 0.0833333f}, {0.1f, 0.9f, 0.0f}},
-    {{-0.166667f, -0.0833333f, 0.25f}, {0.6f, 0.5f, 0.7f}},
-    {{-0.166667f, 0.0833333f, -0.25f}, {0.4f, 0.2f, 0.8f}},
-    {{-0.166667f, 0.0833333f, -0.0833333f}, {0.9f, 0.6f, 0.1f}},
-    {{-0.166667f, 0.0833333f, 0.0833333f}, {0.2f, 0.7f, 0.3f}},
-    {{-0.166667f, 0.0833333f, 0.25f}, {0.5f, 0.0f, 0.9f}},
-    {{-0.166667f, 0.25f, -0.25f}, {0.7f, 0.1f, 0.4f}},
-    {{-0.166667f, 0.25f, -0.0833333f}, {0.3f, 0.8f, 0.6f}},
-    {{-0.166667f, 0.25f, 0.0833333f}, {0.6f, 0.4f, 0.2f}},
-    {{-0.166667f, 0.25f, 0.25f}, {0.1f, 0.5f, 0.7f}},
-    {{0.166667f, -0.25f, -0.25f}, {0.8f, 0.3f, 0.5f}},
-    {{0.166667f, -0.25f, -0.0833333f}, {0.4f, 0.9f, 0.1f}},
-    {{0.166667f, -0.25f, 0.0833333f}, {0.5f, 0.2f, 0.6f}},
-    {{0.166667f, -0.25f, 0.25f}, {0.9f, 0.7f, 0.0f}},
-    {{0.166667f, -0.0833333f, -0.25f}, {0.1f, 0.4f, 0.8f}},
-    {{0.166667f, -0.0833333f, -0.0833333f}, {0.6f, 0.3f, 0.5f}},
-    {{0.166667f, -0.0833333f, 0.0833333f}, {0.2f, 0.8f, 0.7f}},
-    {{0.166667f, -0.0833333f, 0.25f}, {0.7f, 0.5f, 0.3f}},
-    {{0.166667f, 0.0833333f, -0.25f}, {0.3f, 0.6f, 0.9f}},
-    {{0.166667f, 0.0833333f, -0.0833333f}, {0.5f, 0.1f, 0.4f}},
-    {{0.166667f, 0.0833333f, 0.0833333f}, {0.8f, 0.7f, 0.2f}},
-    {{0.166667f, 0.0833333f, 0.25f}, {0.0f, 0.5f, 0.6f}},
-    {{0.166667f, 0.25f, -0.25f}, {0.4f, 0.3f, 0.1f}},
-    {{0.166667f, 0.25f, -0.0833333f}, {0.9f, 0.8f, 0.5f}},
-    {{0.166667f, 0.25f, 0.0833333f}, {0.2f, 0.6f, 0.7f}},
-    {{0.166667f, 0.25f, 0.25f}, {0.7f, 0.4f, 0.0f}},
-    {{0.5f, -0.25f, -0.25f}, {0.6f, 0.1f, 0.5f}},
-    {{0.5f, -0.25f, -0.0833333f}, {0.3f, 0.7f, 0.8f}},
-    {{0.5f, -0.25f, 0.0833333f}, {0.5f, 0.9f, 0.2f}},
-    {{0.5f, -0.25f, 0.25f}, {0.8f, 0.0f, 0.4f}},
-    {{0.5f, -0.0833333f, -0.25f}, {0.1f, 0.5f, 0.6f}},
-    {{0.5f, -0.0833333f, -0.0833333f}, {0.4f, 0.2f, 0.9f}},
-    {{0.5f, -0.0833333f, 0.0833333f}, {0.7f, 0.3f, 0.1f}},
-    {{0.5f, -0.0833333f, 0.25f}, {0.0f, 0.8f, 0.5f}},
-    {{0.5f, 0.0833333f, -0.25f}, {0.9f, 0.6f, 0.3f}},
-    {{0.5f, 0.0833333f, -0.0833333f}, {0.2f, 0.4f, 0.7f}},
-    {{0.5f, 0.0833333f, 0.0833333f}, {0.5f, 0.1f, 0.8f}},
-    {{0.5f, 0.0833333f, 0.25f}, {0.6f, 0.5f, 0.0f}},
-    {{0.5f, 0.25f, -0.25f}, {0.3f, 0.9f, 0.4f}},
-    {{0.5f, 0.25f, -0.0833333f}, {0.8f, 0.2f, 0.5f}},
-    {{0.5f, 0.25f, 0.0833333f}, {0.1f, 0.7f, 0.6f}},
-    {{0.5f, 0.25f, 0.25f}, {0.4f, 0.0f, 0.9f}},
-};
+//std::vector<VertexData> modelData {
+//    {{-0.5f, -0.25f, -0.25f}, {0.1f, 0.3f, 0.9f}},
+//    {{-0.5f, -0.25f, -0.0833333f}, {0.4f, 0.7f, 0.2f}},
+//    {{-0.5f, -0.25f, 0.0833333f}, {0.8f, 0.5f, 0.6f}},
+//    {{-0.5f, -0.25f, 0.25f}, {0.2f, 0.1f, 0.4f}},
+//    {{-0.5f, -0.0833333f, -0.25f}, {0.9f, 0.0f, 0.3f}},
+//    {{-0.5f, -0.0833333f, -0.0833333f}, {0.5f, 0.5f, 0.5f}},
+//    {{-0.5f, -0.0833333f, 0.0833333f}, {0.7f, 0.2f, 0.8f}},
+//    {{-0.5f, -0.0833333f, 0.25f}, {0.3f, 0.6f, 0.1f}},
+//    {{-0.5f, 0.0833333f, -0.25f}, {0.0f, 0.4f, 0.7f}},
+//    {{-0.5f, 0.0833333f, -0.0833333f}, {0.6f, 0.9f, 0.2f}},
+//    {{-0.5f, 0.0833333f, 0.0833333f}, {0.1f, 0.5f, 0.3f}},
+//    {{-0.5f, 0.0833333f, 0.25f}, {0.8f, 0.1f, 0.6f}},
+//    {{-0.5f, 0.25f, -0.25f}, {0.4f, 0.7f, 0.0f}},
+//    {{-0.5f, 0.25f, -0.0833333f}, {0.3f, 0.2f, 0.5f}},
+//    {{-0.5f, 0.25f, 0.0833333f}, {0.9f, 0.8f, 0.4f}},
+//    {{-0.5f, 0.25f, 0.25f}, {0.5f, 0.3f, 0.7f}},
+//    {{-0.166667f, -0.25f, -0.25f}, {0.2f, 0.6f, 0.1f}},
+//    {{-0.166667f, -0.25f, -0.0833333f}, {0.7f, 0.4f, 0.9f}},
+//    {{-0.166667f, -0.25f, 0.0833333f}, {0.0f, 0.8f, 0.5f}},
+//    {{-0.166667f, -0.25f, 0.25f}, {0.3f, 0.1f, 0.6f}},
+//    {{-0.166667f, -0.0833333f, -0.25f}, {0.5f, 0.7f, 0.2f}},
+//    {{-0.166667f, -0.0833333f, -0.0833333f}, {0.8f, 0.3f, 0.4f}},
+//    {{-0.166667f, -0.0833333f, 0.0833333f}, {0.1f, 0.9f, 0.0f}},
+//    {{-0.166667f, -0.0833333f, 0.25f}, {0.6f, 0.5f, 0.7f}},
+//    {{-0.166667f, 0.0833333f, -0.25f}, {0.4f, 0.2f, 0.8f}},
+//    {{-0.166667f, 0.0833333f, -0.0833333f}, {0.9f, 0.6f, 0.1f}},
+//    {{-0.166667f, 0.0833333f, 0.0833333f}, {0.2f, 0.7f, 0.3f}},
+//    {{-0.166667f, 0.0833333f, 0.25f}, {0.5f, 0.0f, 0.9f}},
+//    {{-0.166667f, 0.25f, -0.25f}, {0.7f, 0.1f, 0.4f}},
+//    {{-0.166667f, 0.25f, -0.0833333f}, {0.3f, 0.8f, 0.6f}},
+//    {{-0.166667f, 0.25f, 0.0833333f}, {0.6f, 0.4f, 0.2f}},
+//    {{-0.166667f, 0.25f, 0.25f}, {0.1f, 0.5f, 0.7f}},
+//    {{0.166667f, -0.25f, -0.25f}, {0.8f, 0.3f, 0.5f}},
+//    {{0.166667f, -0.25f, -0.0833333f}, {0.4f, 0.9f, 0.1f}},
+//    {{0.166667f, -0.25f, 0.0833333f}, {0.5f, 0.2f, 0.6f}},
+//    {{0.166667f, -0.25f, 0.25f}, {0.9f, 0.7f, 0.0f}},
+//    {{0.166667f, -0.0833333f, -0.25f}, {0.1f, 0.4f, 0.8f}},
+//    {{0.166667f, -0.0833333f, -0.0833333f}, {0.6f, 0.3f, 0.5f}},
+//    {{0.166667f, -0.0833333f, 0.0833333f}, {0.2f, 0.8f, 0.7f}},
+//    {{0.166667f, -0.0833333f, 0.25f}, {0.7f, 0.5f, 0.3f}},
+//    {{0.166667f, 0.0833333f, -0.25f}, {0.3f, 0.6f, 0.9f}},
+//    {{0.166667f, 0.0833333f, -0.0833333f}, {0.5f, 0.1f, 0.4f}},
+//    {{0.166667f, 0.0833333f, 0.0833333f}, {0.8f, 0.7f, 0.2f}},
+//    {{0.166667f, 0.0833333f, 0.25f}, {0.0f, 0.5f, 0.6f}},
+//    {{0.166667f, 0.25f, -0.25f}, {0.4f, 0.3f, 0.1f}},
+//    {{0.166667f, 0.25f, -0.0833333f}, {0.9f, 0.8f, 0.5f}},
+//    {{0.166667f, 0.25f, 0.0833333f}, {0.2f, 0.6f, 0.7f}},
+//    {{0.166667f, 0.25f, 0.25f}, {0.7f, 0.4f, 0.0f}},
+//    {{0.5f, -0.25f, -0.25f}, {0.6f, 0.1f, 0.5f}},
+//    {{0.5f, -0.25f, -0.0833333f}, {0.3f, 0.7f, 0.8f}},
+//    {{0.5f, -0.25f, 0.0833333f}, {0.5f, 0.9f, 0.2f}},
+//    {{0.5f, -0.25f, 0.25f}, {0.8f, 0.0f, 0.4f}},
+//    {{0.5f, -0.0833333f, -0.25f}, {0.1f, 0.5f, 0.6f}},
+//    {{0.5f, -0.0833333f, -0.0833333f}, {0.4f, 0.2f, 0.9f}},
+//    {{0.5f, -0.0833333f, 0.0833333f}, {0.7f, 0.3f, 0.1f}},
+//    {{0.5f, -0.0833333f, 0.25f}, {0.0f, 0.8f, 0.5f}},
+//    {{0.5f, 0.0833333f, -0.25f}, {0.9f, 0.6f, 0.3f}},
+//    {{0.5f, 0.0833333f, -0.0833333f}, {0.2f, 0.4f, 0.7f}},
+//    {{0.5f, 0.0833333f, 0.0833333f}, {0.5f, 0.1f, 0.8f}},
+//    {{0.5f, 0.0833333f, 0.25f}, {0.6f, 0.5f, 0.0f}},
+//    {{0.5f, 0.25f, -0.25f}, {0.3f, 0.9f, 0.4f}},
+//    {{0.5f, 0.25f, -0.0833333f}, {0.8f, 0.2f, 0.5f}},
+//    {{0.5f, 0.25f, 0.0833333f}, {0.1f, 0.7f, 0.6f}},
+//    {{0.5f, 0.25f, 0.25f}, {0.4f, 0.0f, 0.9f}},
+//};
 
 void znnwidget::initializeGL(){
     // 创建 VAO 和 VBO 和 EBO
     initializeOpenGLFunctions();
-    gshDate(testData);
-
-    vertices = {
-        // 前面
-        {{-Axis_x, -Axis_y,  Axis_z}, {1.0f, 1.0f, 1.0f}}, // 0
-        {{ Axis_x, -Axis_y,  Axis_z}, {1.0f, 1.0f, 1.0f}}, // 1
-        {{ Axis_x,  Axis_y,  Axis_z}, {1.0f, 1.0f, 1.0f}}, // 2
-        {{-Axis_x,  Axis_y,  Axis_z}, {1.0f, 1.0f, 1.0f}}, // 3
-
-        // 后面
-        {{-Axis_x, -Axis_y, -Axis_z}, {1.0f, 1.0f, 1.0f}}, // 4
-        {{ Axis_x, -Axis_y, -Axis_z}, {1.0f, 1.0f, 1.0f}}, // 5
-        {{ Axis_x,  Axis_y, -Axis_z}, {1.0f, 1.0f, 1.0f}}, // 6
-        {{-Axis_x,  Axis_y, -Axis_z}, {1.0f, 1.0f, 1.0f}}, // 7
-    };
 
     glEnable(GL_DEPTH_TEST);
     shaderProgram.addShaderFromSourceFile(QOpenGLShader::Vertex, ":/shaders/shaders.vert");
     shaderProgram.addShaderFromSourceFile(QOpenGLShader::Fragment, ":/shaders/shader.frag");
     shaderProgram.link(); // 链接
     shaderProgram.bind();
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1,&EBO);
+
+    Axis_VAO.create();
+    Axis_VBO.create();
+    Axis_EBO.create();
     // 绑定 VAO（开始记录状态）
-    glBindVertexArray(VAO);
-    // 绑定 VBO 并上传数据
+    Axis_VAO.bind();
+    // 绑定 VBO 并上传空数据
+    Axis_VBO.bind();
+    Axis_VBO.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    Axis_VBO.allocate(nullptr, 0);
+
     // 绑定 EBO 并上传数据
-    // EBO 必须在 VAO绑定的时候 绑定
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(indices),indices,GL_STATIC_DRAW);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(VertexData), vertices.data(), GL_STATIC_DRAW);
+    // EBO 必须在 VAO绑定的时候绑定
+    Axis_EBO.bind();
+    Axis_EBO.setUsagePattern(QOpenGLBuffer::DynamicDraw);
+    Axis_EBO.allocate(indices, sizeof(indices));
+
     // 设置顶点属性规则（记录到 VAO 中）
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(VertexData, position));
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(VertexData), (void*)offsetof(VertexData, color));
     glEnableVertexAttribArray(1);
     // 解绑 VBO（可选，但推荐）
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    Axis_VBO.release();
     // 解绑 VAO（防止意外修改）
-    glBindVertexArray(0);
+    Axis_VAO.release();
 
     // 初始化Data_VBO，这一步先不关联VAO
     // 先上传空数据给GPU，在读入文件数据时重新 allocate
     Data_VBO.create();
     Data_VBO.bind();
-    Data_VBO.setUsagePattern(QOpenGLBuffer::StaticDraw); // 静态
+    Data_VBO.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     Data_VBO.allocate(nullptr, 0); // 分配空数据
-
-    // << ---               testSlice               --- >>
-
-    num_x = num_y = num_z = 4u;
-    Data_VBO.allocate(testData.data(), testData.size() * sizeof(VertexData));
-
-    // << ---               testSlice               --- >>
 
     Data_VBO.release();
 
@@ -206,7 +190,7 @@ void znnwidget::initializeGL(){
 
     Surface_EBO.create();
     Surface_EBO.bind();
-    Surface_EBO.setUsagePattern(QOpenGLBuffer::StaticDraw);
+    Surface_EBO.setUsagePattern(QOpenGLBuffer::DynamicDraw);
     Surface_EBO.allocate(nullptr, 0);
     Data_VBO.release();
     Surface_VAO.release();
@@ -279,39 +263,43 @@ void znnwidget::paintGL()
         break;
     }
 
+    if (axisData.empty()) {
+        return;
+    }
+
     // 画系
-    glBindVertexArray(VAO);
+    Axis_VAO.bind();
     timer_1.start(10);
     glDrawElements(GL_LINES, 24, GL_UNSIGNED_INT, 0);
-    glBindVertexArray(0);
-    glUseProgram(0);
+    Axis_VAO.release();
+    shaderProgram.release();
 
     QPainter painter(this);
     painter.setPen(Qt::red);
     painter.setFont(QFont("Arial", 10));
-    int count = 0;
-    for (const auto& v : getEdgeVertices(testData,num_x,num_y,num_z)) {
-        QVector4D worldPos(v.position, 1.0f);
-        QVector4D clipPos = projection * view * model * worldPos;
-        clipPos /= clipPos.w();
-        if (clipPos.z() < -1.0f || clipPos.z() > 1.0f) continue;
-        if (clipPos.x() < -1.0f || clipPos.x() > 1.0f ||
-                clipPos.y() < -1.0f || clipPos.y() > 1.0f) continue;
-        QPoint screenPos = projectToScreen(v.position, model, view, projection);
-        if(count < 4 * num_x - 4) painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.x(), 0), 0, 'f', 2));
-        else if(count < 4*num_x + 4 * num_y - 8) painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.y(), 0), 0, 'f', 2));
-        else painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.z(), 0), 0, 'f', 2));
-        ++count;
-    }
-    painter.setPen(Qt::white);
-    for (const auto& v : vertices) {
-        QPoint screenPos = projectToScreen(v.position, model, view, projection);
-        if (screenPos == QPoint(-1000, -1000)) continue;
-        painter.drawText(screenPos, QString("(%1,%2,%3)")
-                         .arg(outtoin(v.position.x(), 0), 0, 'f', 2)
-                         .arg(outtoin(v.position.y(), 1), 0, 'f', 2)
-                         .arg(outtoin(v.position.z(), 2), 0, 'f', 2));
-    }
+//    int count = 0;
+//    for (const auto& v : getEdgeVertices(modelData,num_x,num_y,num_z)) {
+//        QVector4D worldPos(v.position, 1.0f);
+//        QVector4D clipPos = projection * view * model * worldPos;
+//        clipPos /= clipPos.w();
+//        if (clipPos.z() < -1.0f || clipPos.z() > 1.0f) continue;
+//        if (clipPos.x() < -1.0f || clipPos.x() > 1.0f ||
+//                clipPos.y() < -1.0f || clipPos.y() > 1.0f) continue;
+//        QPoint screenPos = projectToScreen(v.position, model, view, projection);
+//        if(count < 4 * num_x - 4) painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.x(), 0), 0, 'f', 2));
+//        else if(count < 4*num_x + 4 * num_y - 8) painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.y(), 0), 0, 'f', 2));
+//        else painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.z(), 0), 0, 'f', 2));
+//        ++count;
+//    }
+//    painter.setPen(Qt::white);
+//    for (const auto& v : axisData) {
+//        QPoint screenPos = projectToScreen(v.position, model, view, projection);
+//        if (screenPos == QPoint(-1000, -1000)) continue;
+//        painter.drawText(screenPos, QString("(%1,%2,%3)")
+//                         .arg(outtoin(v.position.x(), 0), 0, 'f', 2)
+//                         .arg(outtoin(v.position.y(), 1), 0, 'f', 2)
+//                         .arg(outtoin(v.position.z(), 2), 0, 'f', 2));
+//    }
 
 
     painter.end();
@@ -399,11 +387,12 @@ void znnwidget::getSliceIndex(int type, unsigned l)
     Slice_VAO.bind();
     Slice_EBO.bind();
     Slice_EBO.allocate(Slice_idx.constData(), sizeof(unsigned) * (unsigned)(Slice_idx.size()));
+    Slice_VAO.release();
     doneCurrent();
     update();
 }
 
-void znnwidget::gshDate(std::vector<VertexData>& data)
+void znnwidget::gshData(std::vector<VertexData>& data)
 {
     for (auto& v : data) {
         v.position[0] = intoout(v.position[0],0);
@@ -415,13 +404,13 @@ void znnwidget::gshDate(std::vector<VertexData>& data)
 void znnwidget::gshzb()
 {
     float range[3];      // 保存每一对的范围
-    float scale[3];      // 保存归一化后的比例
+//    float scale[3];      // 保存归一化后的比例
     // 计算每一对的差值
     for (int i = 0; i < 3; ++i) {
         range[i] = max_[i] - min_[i];
     }
     // 找出最大范围值
-    double max_range = std::max({range[0], range[1], range[2]});
+    float max_range = std::max({range[0], range[1], range[2]});
     // 按比例归一化，最大者为 1，其他按比例缩放
     Axis_x = range[0] / max_range;
     Axis_y = range[1] / max_range;
@@ -488,12 +477,52 @@ void znnwidget::keyPressEvent(QKeyEvent *event)
     }
     update(); // 重新绘制
 }
+
+void znnwidget::resetData()
+{
+    axisData.clear();
+    modelData.clear();
+}
+
+void znnwidget::processData()
+{
+    // 处理坐标轴
+    gshzb();
+    // 前面
+    axisData.push_back(VertexData({ -Axis_x, -Axis_y,  Axis_z })); // 0
+    axisData.push_back(VertexData({  Axis_x, -Axis_y,  Axis_z })); // 1
+    axisData.push_back(VertexData({  Axis_x,  Axis_y,  Axis_z })); // 2
+    axisData.push_back(VertexData({ -Axis_x,  Axis_y,  Axis_z })); // 3
+    // 后面
+    axisData.push_back(VertexData({ -Axis_x, -Axis_y, -Axis_z })); // 4
+    axisData.push_back(VertexData({  Axis_x, -Axis_y, -Axis_z })); // 5
+    axisData.push_back(VertexData({  Axis_x,  Axis_y, -Axis_z })); // 6
+    axisData.push_back(VertexData({ -Axis_x,  Axis_y, -Axis_z })); // 7
+    Axis_VBO.bind();
+    Axis_VBO.allocate(axisData.data(), sizeof(VertexData) * (unsigned)(axisData.size()));
+    Axis_VBO.release();
+
+    gshData(modelData);
+
+    qDebug() << modelData.size() << '\n';
+
+    Data_VBO.bind();
+    Data_VBO.allocate(modelData.data(), sizeof(VertexData) * (unsigned)(modelData.size()));
+    Data_VBO.release();
+}
+
 znnwidget::~znnwidget()
 {
     if(!isValid()) return;
     makeCurrent();
-    glDeleteBuffers(1,&VBO);
-    glDeleteVertexArrays(1,&VAO);
-    glDeleteBuffers(1,&EBO);
+    Axis_VAO.destroy();
+    Axis_VBO.destroy();
+    Axis_EBO.destroy();
+
+    Data_VBO.destroy();
+    Surface_VAO.destroy();
+    Surface_EBO.destroy();
+    Slice_VAO.destroy();
+    Slice_EBO.destroy();
     doneCurrent();
 }

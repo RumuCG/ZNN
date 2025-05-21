@@ -34,12 +34,15 @@ private slots:
 
     void on_DisplayMode_currentIndexChanged(int index);
 
-    void on_PostionSlider_sliderMoved(int position);
+//    void on_PostionSlider_sliderMoved(int position);
 
     void on_PostionSlider_valueChanged(int value);
 
 private:
     Ui::MainWindow *ui;
+    float d_min, d_max;
+    bool fileRead; // 标志是否读入了文件
+    bool readFile(const QString &FileName);
 };
 
 #endif // MAINWINDOW_H
