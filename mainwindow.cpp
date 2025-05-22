@@ -19,7 +19,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actdrawrect_triggered()
 {
-    QString path = QCoreApplication::applicationDirPath() + "/input.bin";
+    QString path = QCoreApplication::applicationDirPath() + "/velocity_model.txt";
     fileRead = readFile(path);
 }
 
@@ -150,65 +150,64 @@ void MainWindow::on_PostionSlider_valueChanged(int p)
 
 bool MainWindow::readFile(const QString &FileName)
 {
-//    qDebug() << "reading File\n";
-//    // 以只读方式打开数据文件
-//    QFile dataFile(FileName);
-//    qDebug() << "ready to read " << FileName << '\n';
-//    if (not dataFile.open(QIODevice::ReadOnly)) {
-//        qDebug() << "Fail to read File " << FileName << '\n';
-//        return false;
-//    }
+    qDebug() << "reading File\n";
+    // 以只读方式打开数据文件
+    QFile dataFile(FileName);
+    qDebug() << "ready to read " << FileName << '\n';
+    if (not dataFile.open(QIODevice::ReadOnly | QIODevice::Text)) { // QIODevice::Text 处理换行符号
+        qDebug() << "Fail to read File " << FileName << '\n';
+        return false;
+    }
+    QTextStream in(&dataFile);
+    QStringList lines = in.readAll()                                // 读取所有行
+                          .split('\n', QString::SkipEmptyParts);    // 只将非空行存到lines里面
 
     ui->openGLWidget->resetData();
 
-//    QDataStream dataSrc(&dataFile);
-//    dataSrc.setVersion(QDataStream::Qt_5_9);
-//    dataSrc >> d_min >> d_max; // 开头一行是最小值和最大值
-//    qDebug() << d_min << ' ' << d_max << '\n';
-//    if (d_min != 3000.0f) {
-//        exit(1);
-//    }
-//    else {
-//        qDebug() << "read successfully!\n";
-//    }
-
-    std::ifstream dataSrc(FileName.toStdString(), std::ios::binary);
-    float d;
-    dataSrc.read(reinterpret_cast<char*>(&d), sizeof(float));
-    d_min = 4000.0f;
-    dataSrc.read(reinterpret_cast<char*>(&d), sizeof(float));
-    d_max = 4500.0f;
-    if (d != 5000.0f) {
-        qDebug() << d << ' ' << "Fail to read\n";
-        exit(0);
-    }
-
     // 以下参数都是我们写给配置文件的参数，是已知的
     // 由于还未实现创建配置文件与差值程序交互，这里先用测试文件的参数
-    int x = 250, y = 250, z = 175;
+    int x = 25, y = 25, z = 24;
     ui->openGLWidget->modelData.reserve(x * y * z);
-    float x_min = -5000.0f, y_min = -5000.0f, z_min = 0.0f;
+    float x_min = 0.0f, y_min = -500.0f, z_min = 2640.0f;
     float x_d = 40.0f, y_d = 40.0f, z_d = 40.0f;
-    int id = 0;
-    for (int i = 0; i < x; i++) {
-        if (i % 50 == 0) {
-            qDebug() << i << "-th reading\n";
+
+    int pos = 0; // 记录坐标
+    bool headLine = true; // 特殊处理第一行
+    for (const QString &line : lines) {
+        QStringList valueList = line.split(' ', QString::SkipEmptyParts);
+        if (valueList.empty()) {
+            continue;
         }
-        for (int j = 0; j < y; j++) {
-            for (int k = 0; k < z; k++) {
-                dataSrc.read(reinterpret_cast<char*>(&d), sizeof(float));
+
+        if (headLine) {                         // 第一行读入最值
+            d_min = valueList[0].toFloat();
+            d_max = valueList[1].toFloat();
+            headLine = false;
+            qDebug() << d_min << ' ' << d_max << '\n';
+        }
+        else {
+            for (const QString &v : valueList) {
+                // 根据pos 计算坐标 (i, j, k)
+                // pos = y * z * i + z * j + k
+                int tmp = pos + 1;
+                int k = pos % z;
+                pos /= z;
+                int j = pos % y;
+                pos /= y;
+                int i = pos;
+                pos = tmp;
+
                 VertexData node(x_min + i * x_d, y_min + j * y_d, z_min + k * z_d);
-                node.setColor(d, d_min, d_max);
+                node.setColor(v.toFloat(), d_min, d_max);
                 ui->openGLWidget->modelData.push_back(node);
             }
         }
     }
 
-    qDebug() << "File read ok !\n";
-//    exit(1);
+    qDebug() << "File read ok !\n" << ui->openGLWidget->modelData.size() << " datas Read\n";
 
     ui->openGLWidget->processData();
 
-//    dataFile.close();
+    dataFile.close();
     return true;
 }

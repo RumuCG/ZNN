@@ -43,11 +43,11 @@ public:
     std::vector<VertexData> axisData;  // 坐标系再屏幕上的位置
     std::vector<VertexData> modelData; // 每个点的数据
 //    unsigned num_x, num_y, num_z;
-    unsigned num_x = 250, num_y = 250, num_z = 175; // 测试数据的规模
+    unsigned num_x = 25, num_y = 25, num_z = 24; // 测试数据的规模
     // 离散化后是一个 num_x * num_y * num_z 的三维数组，这三个值需要读入数据后算出
     // 0，1，2分别是x，y，z三个方向的最大最小值
 //    float min_[3], max_[3];
-    float min_[3] = { -5000.0f, -5000.0f, 0.0f }, max_[3] = { min_[0] + 40.0f * (num_x - 1), min_[1] + 40.0f * (num_y - 1), min_[2] + 40.0f * (num_z - 1) }; // 测试数据的步长为 40
+    float min_[3] = { 0.0f, -500.0f, 2640.0f }, max_[3] = { min_[0] + 40.0f * (num_x - 1), min_[1] + 40.0f * (num_y - 1), min_[2] + 40.0f * (num_z - 1) }; // 测试数据的步长为 40
     void resetData();
     void processData();
 
