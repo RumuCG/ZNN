@@ -38,6 +38,8 @@ private slots:
 
     void on_PostionSlider_valueChanged(int value);
 
+    void on_colorshow_triggered();
+
 private:
     Ui::MainWindow *ui;
     float d_min, d_max;

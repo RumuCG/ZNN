@@ -1,4 +1,5 @@
 #include "znnwidget.h"
+#include "vertexdata.h"
 znnwidget::znnwidget(QWidget *parent) :
     QOpenGLWidget(parent),
     Axis_VBO(QOpenGLBuffer::VertexBuffer),      // 指定为vbo
@@ -277,29 +278,55 @@ void znnwidget::paintGL()
     QPainter painter(this);
     painter.setPen(Qt::red);
     painter.setFont(QFont("Arial", 10));
-//    int count = 0;
-//    for (const auto& v : getEdgeVertices(modelData,num_x,num_y,num_z)) {
-//        QVector4D worldPos(v.position, 1.0f);
-//        QVector4D clipPos = projection * view * model * worldPos;
-//        clipPos /= clipPos.w();
-//        if (clipPos.z() < -1.0f || clipPos.z() > 1.0f) continue;
-//        if (clipPos.x() < -1.0f || clipPos.x() > 1.0f ||
-//                clipPos.y() < -1.0f || clipPos.y() > 1.0f) continue;
-//        QPoint screenPos = projectToScreen(v.position, model, view, projection);
-//        if(count < 4 * num_x - 4) painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.x(), 0), 0, 'f', 2));
-//        else if(count < 4*num_x + 4 * num_y - 8) painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.y(), 0), 0, 'f', 2));
-//        else painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.z(), 0), 0, 'f', 2));
-//        ++count;
-//    }
-//    painter.setPen(Qt::white);
-//    for (const auto& v : axisData) {
-//        QPoint screenPos = projectToScreen(v.position, model, view, projection);
-//        if (screenPos == QPoint(-1000, -1000)) continue;
-//        painter.drawText(screenPos, QString("(%1,%2,%3)")
-//                         .arg(outtoin(v.position.x(), 0), 0, 'f', 2)
-//                         .arg(outtoin(v.position.y(), 1), 0, 'f', 2)
-//                         .arg(outtoin(v.position.z(), 2), 0, 'f', 2));
-//    }
+    if(is_draw == true){
+        int x = 30, y = 50, w = 2000, h = 50;
+        QRect rect(x, y, w, h);
+        QLinearGradient gradient(x, y, x + w, y);
+
+        // 绘制颜色渐变
+        for (int i = 0; i <= 100; ++i) {
+            double ratio = i / 100.0; // 0.00 ~ 1.0
+            gradient.setColorAt(ratio, stColor(ratio * (dmax - dmin) + dmin, dmin, dmax));
+        }
+
+        painter.setBrush(gradient);
+        painter.setPen(Qt::black);
+        painter.drawRect(rect);
+        painter.setPen(Qt::white);
+        painter.setFont(QFont("Arial", 6));
+        for (int i = 0; i < 10; ++i) {
+            double ratio = i / 10.0;
+            int tick_x = x + static_cast<int>(ratio * w);
+            float value = dmin + ratio * (dmax - dmin);
+            QString text = QString::number(value, 'f', 1); // 保留1位小数
+            int text_width = painter.fontMetrics().width(text);
+            painter.drawText(tick_x - text_width / 2, y + h + 15, text);
+            painter.drawLine(tick_x, y + h, tick_x, y + h + 5);
+        }
+    }
+    //    int count = 0;
+    //    for (const auto& v : getEdgeVertices(modelData,num_x,num_y,num_z)) {
+    //        QVector4D worldPos(v.position, 1.0f);
+    //        QVector4D clipPos = projection * view * model * worldPos;
+    //        clipPos /= clipPos.w();
+    //        if (clipPos.z() < -1.0f || clipPos.z() > 1.0f) continue;
+    //        if (clipPos.x() < -1.0f || clipPos.x() > 1.0f ||
+    //                clipPos.y() < -1.0f || clipPos.y() > 1.0f) continue;
+    //        QPoint screenPos = projectToScreen(v.position, model, view, projection);
+    //        if(count < 4 * num_x - 4) painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.x(), 0), 0, 'f', 2));
+    //        else if(count < 4*num_x + 4 * num_y - 8) painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.y(), 0), 0, 'f', 2));
+    //        else painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.z(), 0), 0, 'f', 2));
+    //        ++count;
+    //    }
+    //    painter.setPen(Qt::white);
+    //    for (const auto& v : axisData) {
+    //        QPoint screenPos = projectToScreen(v.position, model, view, projection);
+    //        if (screenPos == QPoint(-1000, -1000)) continue;
+    //        painter.drawText(screenPos, QString("(%1,%2,%3)")
+    //                         .arg(outtoin(v.position.x(), 0), 0, 'f', 2)
+    //                         .arg(outtoin(v.position.y(), 1), 0, 'f', 2)
+    //                         .arg(outtoin(v.position.z(), 2), 0, 'f', 2));
+    //    }
 
 
     painter.end();
@@ -404,7 +431,7 @@ void znnwidget::gshData(std::vector<VertexData>& data)
 void znnwidget::gshzb()
 {
     float range[3];      // 保存每一对的范围
-//    float scale[3];      // 保存归一化后的比例
+    //    float scale[3];      // 保存归一化后的比例
     // 计算每一对的差值
     for (int i = 0; i < 3; ++i) {
         range[i] = max_[i] - min_[i];
@@ -446,6 +473,13 @@ std::vector<VertexData> znnwidget::getEdgeVertices(const std::vector<VertexData>
     }
 
     return result;
+}
+
+void znnwidget::drawColor(float dmi, float dma,bool f)
+{
+    is_draw = f;
+    dmin = dmi;
+    dmax = dma;
 }
 
 
@@ -510,7 +544,19 @@ void znnwidget::processData()
     Data_VBO.allocate(modelData.data(), sizeof(VertexData) * (unsigned)(modelData.size()));
     Data_VBO.release();
 }
+QColor znnwidget::stColor(float a, float mn, float mx) {
+    // 根据速度的最大值和最小值将该节点的速度值归一化到[0.0, 1.0]
+    double t = (a - mn) / (mx - mn);
+    if (t < 0.0) t = 0.0;
+    if (t > 1.0) t = 1.0;
+    // 使用 HSL 颜色进行过度
+    // 计算色相(240.0为蓝 360.0为红)
+    double hue = 240.0 + 120.0 * t;
 
+    QColor tmp = QColor::fromHslF(hue / 360.0, 1.0, 0.5);
+
+    return tmp;
+}
 znnwidget::~znnwidget()
 {
     if(!isValid()) return;

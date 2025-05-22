@@ -2,7 +2,6 @@
 #define VERTEXDATA_H
 #include <QVector3D>
 #include <QColor>
-
 struct VertexData {
     QVector3D position;
     QVector3D color;
@@ -26,5 +25,4 @@ struct VertexData {
         color = { static_cast<float>(tmp.redF()), static_cast<float>(tmp.greenF()), static_cast<float>(tmp.blueF()) };
     }
 };
-
 #endif // VERTEXDATA_H

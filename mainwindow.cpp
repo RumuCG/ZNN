@@ -211,3 +211,9 @@ bool MainWindow::readFile(const QString &FileName)
     dataFile.close();
     return true;
 }
+
+void MainWindow::on_colorshow_triggered()
+{
+    ui->openGLWidget->drawColor(d_min,d_max,ui-> colorshow ->isChecked());
+    update();
+}

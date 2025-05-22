@@ -284,6 +284,7 @@
    <addaction name="actdrawrect"/>
    <addaction name="actclear"/>
    <addaction name="actxc"/>
+   <addaction name="colorshow"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="actdrawrect">
@@ -324,6 +325,14 @@
    </property>
    <property name="text">
     <string>启用旋转</string>
+   </property>
+  </action>
+  <action name="colorshow">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>显示色卡</string>
    </property>
   </action>
  </widget>

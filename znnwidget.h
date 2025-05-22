@@ -29,7 +29,6 @@ public:
     float offsetX = 0.0f;// 上移量
     float offsetY = 0.0f; // 下移量
     float scalen = 1.0f; // 缩放比例
-
     enum Shape{ None, Surface, SliceXY, SliceXZ, SliceYZ, CntShape };
     void setShape(Shape shape);// 对外接口
 
@@ -63,7 +62,10 @@ public:
     void gshData(std::vector<VertexData>&);
     void gshzb();
     std::vector<VertexData> getEdgeVertices(const std::vector<VertexData>& data, int Nx, int Ny, int Nz);
-
+    void drawColor(float dmi,float dma,bool f);
+    bool is_draw = false;
+    QColor stColor(float a, float mn, float mx);
+    float dmin = 0, dmax = 0;
     ~znnwidget();
 protected:
     virtual void initializeGL();
