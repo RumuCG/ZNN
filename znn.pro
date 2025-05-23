@@ -27,12 +27,13 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    znnwidget.cpp
+    znnwidget.cpp \
+    params.cpp
 
 HEADERS += \
         mainwindow.h \
     znnwidget.h \
-    vertexdata.h
+    params.h
 
 FORMS += \
         mainwindow.ui

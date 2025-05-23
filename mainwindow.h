@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "params.h"
 
 namespace Ui {
 class MainWindow;
@@ -42,7 +43,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    float d_min, d_max;
+    Params *params;
     bool fileRead; // 标志是否读入了文件
     bool readFile(const QString &FileName);
 };

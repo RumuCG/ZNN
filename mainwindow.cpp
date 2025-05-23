@@ -1,14 +1,20 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QVBoxLayout>
-#include "vertexdata.h"
-#include <fstream>
+#include <params.h>
+#include <QFileInfo>
+#include <QProcess>
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui(new Ui::MainWindow),
+    params(new Params(this))
 {
+    qDebug() << "init params->max_v = " << params->max_v << '\n';
     this->setStyleSheet("background-color: rgb(21, 160, 221);");  // 浅紫色（plum）
+    qDebug() << "in setupui";
     ui->setupUi(this);
+    qDebug() << "out setupui";
+    ui->openGLWidget->initParams(params);
 
 }
 
@@ -19,8 +25,39 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_actdrawrect_triggered()
 {
-    QString path = QCoreApplication::applicationDirPath() + "/velocity_model.txt";
-    fileRead = readFile(path);
+    if (not params->writeConfig()) {
+        qDebug() << "fail to write config.ini";
+    }
+    else {
+        qDebug() << "write config.ini successfully";
+
+        QString programPath = QCoreApplication::applicationDirPath() + "/1DIPL.exe";
+        if (!QFileInfo::exists(programPath)) {
+            qWarning() << "1DIPL.exe 不存在：" << programPath;
+            return;
+        }
+
+        QProcess process;
+        process.setWorkingDirectory(QCoreApplication::applicationDirPath());
+        process.execute(programPath, QStringList()); // 传递空参数给 1DIPL.exe
+
+        if (!process.waitForStarted(3000)) {
+            qWarning() << "程序启动失败：" << process.errorString();
+            return;
+        }
+        if (!process.waitForFinished(-1)) {
+            qWarning() << "程序执行异常：" << process.errorString();
+            return;
+        }
+
+        int exitCode = process.exitCode();
+        qDebug() << "执行完成，退出码：" << exitCode;
+
+        if (exitCode == 0) {
+            fileRead = readFile(QCoreApplication::applicationDirPath() + "/" +params->outputFileName);
+        }
+    }
+//    fileRead = readFile(QCoreApplication::applicationDirPath() + "/" +params->outputFileName);
 }
 
 void MainWindow::on_actclear_triggered()
@@ -94,8 +131,8 @@ void MainWindow::on_DisplayMode_currentIndexChanged(int index)
     case 2:             // X 沿X轴显示切片
         ui->PostionSlider->setValue(0);
         ui->PostionSlider->setMinimum(0);
-        ui->PostionSlider->setMaximum(ui->openGLWidget->num_x - 1);
-        qDebug() << ui->openGLWidget->num_x;
+        ui->PostionSlider->setMaximum(params->axisCount[0] - 1);
+        // qDebug() << ui->openGLWidget->num_x;
         ui->openGLWidget->setShape(ui->openGLWidget->SliceYZ);
         ui->openGLWidget->getSliceIndex(2, 0u);
 
@@ -103,7 +140,7 @@ void MainWindow::on_DisplayMode_currentIndexChanged(int index)
     case 3:             // Y 沿Y轴显示切片
         ui->PostionSlider->setValue(0);
         ui->PostionSlider->setMinimum(0);
-        ui->PostionSlider->setMaximum(ui->openGLWidget->num_y - 1);
+        ui->PostionSlider->setMaximum(params->axisCount[1] - 1);
         ui->openGLWidget->setShape(ui->openGLWidget->SliceXZ);
         ui->openGLWidget->getSliceIndex(3, 0u);
 
@@ -111,7 +148,7 @@ void MainWindow::on_DisplayMode_currentIndexChanged(int index)
     case 4:             // Z 沿Z轴显示切片
         ui->PostionSlider->setValue(0);
         ui->PostionSlider->setMinimum(0);
-        ui->PostionSlider->setMaximum(ui->openGLWidget->num_z - 1);
+        ui->PostionSlider->setMaximum(params->axisCount[2] - 1);
         ui->openGLWidget->setShape(ui->openGLWidget->SliceXY);
         ui->openGLWidget->getSliceIndex(4, 0u);
 
@@ -162,16 +199,11 @@ bool MainWindow::readFile(const QString &FileName)
     QStringList lines = in.readAll()                                // 读取所有行
                           .split('\n', QString::SkipEmptyParts);    // 只将非空行存到lines里面
 
+
+
     ui->openGLWidget->resetData();
 
-    // 以下参数都是我们写给配置文件的参数，是已知的
-    // 由于还未实现创建配置文件与差值程序交互，这里先用测试文件的参数
-    int x = 25, y = 25, z = 24;
-    ui->openGLWidget->modelData.reserve(x * y * z);
-    float x_min = 0.0f, y_min = -500.0f, z_min = 2640.0f;
-    float x_d = 40.0f, y_d = 40.0f, z_d = 40.0f;
-
-    int pos = 0; // 记录坐标
+    unsigned pos = 0; // 记录坐标
     bool headLine = true; // 特殊处理第一行
     for (const QString &line : lines) {
         QStringList valueList = line.split(' ', QString::SkipEmptyParts);
@@ -179,28 +211,17 @@ bool MainWindow::readFile(const QString &FileName)
             continue;
         }
 
-        if (headLine) {                         // 第一行读入最值
-            d_min = valueList[0].toFloat();
-            d_max = valueList[1].toFloat();
-            headLine = false;
-            qDebug() << d_min << ' ' << d_max << '\n';
-        }
-        else {
-            for (const QString &v : valueList) {
-                // 根据pos 计算坐标 (i, j, k)
-                // pos = y * z * i + z * j + k
-                int tmp = pos + 1;
-                int k = pos % z;
-                pos /= z;
-                int j = pos % y;
-                pos /= y;
-                int i = pos;
-                pos = tmp;
-
-                VertexData node(x_min + i * x_d, y_min + j * y_d, z_min + k * z_d);
-                node.setColor(v.toFloat(), d_min, d_max);
-                ui->openGLWidget->modelData.push_back(node);
-            }
+//        if (headLine) {                         // 第一行读入最值
+//            params->setValueRange(valueList[0].toFloat(), valueList[1].toFloat());
+//            headLine = false;
+//        }
+//        else {
+//            for (const QString &v : valueList) {
+//                ui->openGLWidget->getData(pos++, v.toFloat());
+//            }
+//        }
+        for (const QString &v : valueList) {
+            ui->openGLWidget->getData(pos++, v.toFloat());
         }
     }
 
@@ -214,6 +235,6 @@ bool MainWindow::readFile(const QString &FileName)
 
 void MainWindow::on_colorshow_triggered()
 {
-    ui->openGLWidget->drawColor(d_min,d_max,ui-> colorshow ->isChecked());
-    update();
+//    ui->openGLWidget->is_draw = ui-> colorshow ->isChecked();
+//    update();
 }

@@ -1,5 +1,4 @@
 #include "znnwidget.h"
-#include "vertexdata.h"
 znnwidget::znnwidget(QWidget *parent) :
     QOpenGLWidget(parent),
     Axis_VBO(QOpenGLBuffer::VertexBuffer),      // 指定为vbo
@@ -10,7 +9,11 @@ znnwidget::znnwidget(QWidget *parent) :
 {
     setFocusPolicy(Qt::StrongFocus);
     connect(&timer_1,SIGNAL(timeout()),this,SLOT(on_timeout()));
-    gshzb();
+}
+
+void znnwidget::initParams(Params *p)
+{
+    params = p;
 }
 
 void znnwidget::setShape(znnwidget::Shape shape)
@@ -54,84 +57,12 @@ QPoint znnwidget::projectToScreen(const QVector3D &worldPos, const QMatrix4x4 &m
 
 float znnwidget::intoout(float x,int p)
 {
-    if(p == 0) return (x - min_[p]) / (max_[p] - min_[p]) * 2 * Axis_x - Axis_x;
-    else if(p == 1) return (x - min_[p]) / (max_[p] - min_[p]) * 2 * Axis_y - Axis_y;
-    else return (x - min_[p]) / (max_[p] - min_[p]) * 2 * Axis_z - Axis_z;
+    return (x - params->axisMin[p]) / (params->getDiff(p)) * 2 * Axis_[p] - Axis_[p];
 }
 float znnwidget::outtoin(float x, int p)
 {
-    if(p == 0) return ((x + Axis_x) / (2 * Axis_x)) * (max_[p] - min_[p]) + min_[p];
-    else if(p == 1) return ((x + Axis_y) / (2 * Axis_y)) * (max_[p] - min_[p]) + min_[p];
-    else return ((x + Axis_z) / (2 * Axis_z)) * (max_[p] - min_[p]) + min_[p];
+    return ((x + Axis_[p]) / (2 * Axis_[p])) * (params->getDiff(p)) + params->axisMin[p];
 }
-
-// 4 * 4 * 4 的矩阵
-//std::vector<VertexData> modelData {
-//    {{-0.5f, -0.25f, -0.25f}, {0.1f, 0.3f, 0.9f}},
-//    {{-0.5f, -0.25f, -0.0833333f}, {0.4f, 0.7f, 0.2f}},
-//    {{-0.5f, -0.25f, 0.0833333f}, {0.8f, 0.5f, 0.6f}},
-//    {{-0.5f, -0.25f, 0.25f}, {0.2f, 0.1f, 0.4f}},
-//    {{-0.5f, -0.0833333f, -0.25f}, {0.9f, 0.0f, 0.3f}},
-//    {{-0.5f, -0.0833333f, -0.0833333f}, {0.5f, 0.5f, 0.5f}},
-//    {{-0.5f, -0.0833333f, 0.0833333f}, {0.7f, 0.2f, 0.8f}},
-//    {{-0.5f, -0.0833333f, 0.25f}, {0.3f, 0.6f, 0.1f}},
-//    {{-0.5f, 0.0833333f, -0.25f}, {0.0f, 0.4f, 0.7f}},
-//    {{-0.5f, 0.0833333f, -0.0833333f}, {0.6f, 0.9f, 0.2f}},
-//    {{-0.5f, 0.0833333f, 0.0833333f}, {0.1f, 0.5f, 0.3f}},
-//    {{-0.5f, 0.0833333f, 0.25f}, {0.8f, 0.1f, 0.6f}},
-//    {{-0.5f, 0.25f, -0.25f}, {0.4f, 0.7f, 0.0f}},
-//    {{-0.5f, 0.25f, -0.0833333f}, {0.3f, 0.2f, 0.5f}},
-//    {{-0.5f, 0.25f, 0.0833333f}, {0.9f, 0.8f, 0.4f}},
-//    {{-0.5f, 0.25f, 0.25f}, {0.5f, 0.3f, 0.7f}},
-//    {{-0.166667f, -0.25f, -0.25f}, {0.2f, 0.6f, 0.1f}},
-//    {{-0.166667f, -0.25f, -0.0833333f}, {0.7f, 0.4f, 0.9f}},
-//    {{-0.166667f, -0.25f, 0.0833333f}, {0.0f, 0.8f, 0.5f}},
-//    {{-0.166667f, -0.25f, 0.25f}, {0.3f, 0.1f, 0.6f}},
-//    {{-0.166667f, -0.0833333f, -0.25f}, {0.5f, 0.7f, 0.2f}},
-//    {{-0.166667f, -0.0833333f, -0.0833333f}, {0.8f, 0.3f, 0.4f}},
-//    {{-0.166667f, -0.0833333f, 0.0833333f}, {0.1f, 0.9f, 0.0f}},
-//    {{-0.166667f, -0.0833333f, 0.25f}, {0.6f, 0.5f, 0.7f}},
-//    {{-0.166667f, 0.0833333f, -0.25f}, {0.4f, 0.2f, 0.8f}},
-//    {{-0.166667f, 0.0833333f, -0.0833333f}, {0.9f, 0.6f, 0.1f}},
-//    {{-0.166667f, 0.0833333f, 0.0833333f}, {0.2f, 0.7f, 0.3f}},
-//    {{-0.166667f, 0.0833333f, 0.25f}, {0.5f, 0.0f, 0.9f}},
-//    {{-0.166667f, 0.25f, -0.25f}, {0.7f, 0.1f, 0.4f}},
-//    {{-0.166667f, 0.25f, -0.0833333f}, {0.3f, 0.8f, 0.6f}},
-//    {{-0.166667f, 0.25f, 0.0833333f}, {0.6f, 0.4f, 0.2f}},
-//    {{-0.166667f, 0.25f, 0.25f}, {0.1f, 0.5f, 0.7f}},
-//    {{0.166667f, -0.25f, -0.25f}, {0.8f, 0.3f, 0.5f}},
-//    {{0.166667f, -0.25f, -0.0833333f}, {0.4f, 0.9f, 0.1f}},
-//    {{0.166667f, -0.25f, 0.0833333f}, {0.5f, 0.2f, 0.6f}},
-//    {{0.166667f, -0.25f, 0.25f}, {0.9f, 0.7f, 0.0f}},
-//    {{0.166667f, -0.0833333f, -0.25f}, {0.1f, 0.4f, 0.8f}},
-//    {{0.166667f, -0.0833333f, -0.0833333f}, {0.6f, 0.3f, 0.5f}},
-//    {{0.166667f, -0.0833333f, 0.0833333f}, {0.2f, 0.8f, 0.7f}},
-//    {{0.166667f, -0.0833333f, 0.25f}, {0.7f, 0.5f, 0.3f}},
-//    {{0.166667f, 0.0833333f, -0.25f}, {0.3f, 0.6f, 0.9f}},
-//    {{0.166667f, 0.0833333f, -0.0833333f}, {0.5f, 0.1f, 0.4f}},
-//    {{0.166667f, 0.0833333f, 0.0833333f}, {0.8f, 0.7f, 0.2f}},
-//    {{0.166667f, 0.0833333f, 0.25f}, {0.0f, 0.5f, 0.6f}},
-//    {{0.166667f, 0.25f, -0.25f}, {0.4f, 0.3f, 0.1f}},
-//    {{0.166667f, 0.25f, -0.0833333f}, {0.9f, 0.8f, 0.5f}},
-//    {{0.166667f, 0.25f, 0.0833333f}, {0.2f, 0.6f, 0.7f}},
-//    {{0.166667f, 0.25f, 0.25f}, {0.7f, 0.4f, 0.0f}},
-//    {{0.5f, -0.25f, -0.25f}, {0.6f, 0.1f, 0.5f}},
-//    {{0.5f, -0.25f, -0.0833333f}, {0.3f, 0.7f, 0.8f}},
-//    {{0.5f, -0.25f, 0.0833333f}, {0.5f, 0.9f, 0.2f}},
-//    {{0.5f, -0.25f, 0.25f}, {0.8f, 0.0f, 0.4f}},
-//    {{0.5f, -0.0833333f, -0.25f}, {0.1f, 0.5f, 0.6f}},
-//    {{0.5f, -0.0833333f, -0.0833333f}, {0.4f, 0.2f, 0.9f}},
-//    {{0.5f, -0.0833333f, 0.0833333f}, {0.7f, 0.3f, 0.1f}},
-//    {{0.5f, -0.0833333f, 0.25f}, {0.0f, 0.8f, 0.5f}},
-//    {{0.5f, 0.0833333f, -0.25f}, {0.9f, 0.6f, 0.3f}},
-//    {{0.5f, 0.0833333f, -0.0833333f}, {0.2f, 0.4f, 0.7f}},
-//    {{0.5f, 0.0833333f, 0.0833333f}, {0.5f, 0.1f, 0.8f}},
-//    {{0.5f, 0.0833333f, 0.25f}, {0.6f, 0.5f, 0.0f}},
-//    {{0.5f, 0.25f, -0.25f}, {0.3f, 0.9f, 0.4f}},
-//    {{0.5f, 0.25f, -0.0833333f}, {0.8f, 0.2f, 0.5f}},
-//    {{0.5f, 0.25f, 0.0833333f}, {0.1f, 0.7f, 0.6f}},
-//    {{0.5f, 0.25f, 0.25f}, {0.4f, 0.0f, 0.9f}},
-//};
 
 void znnwidget::initializeGL(){
     // 创建 VAO 和 VBO 和 EBO
@@ -226,6 +157,11 @@ void znnwidget::paintGL()
     glClearColor(0.0f, 0.0f, 0.0f, 5.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     glEnable(GL_DEPTH_TEST);
+
+    if (modelData.empty()) {
+        return;
+    }
+
     shaderProgram.bind();
     QMatrix4x4 model;
     model.scale(scalen);  // 放大
@@ -268,6 +204,8 @@ void znnwidget::paintGL()
         return;
     }
 
+//    qDebug() << "get params->max_v = " << params->max_v << '\n';
+
     // 画系
     Axis_VAO.bind();
     timer_1.start(10);
@@ -275,79 +213,77 @@ void znnwidget::paintGL()
     Axis_VAO.release();
     shaderProgram.release();
 
-    QPainter painter(this);
-    painter.setPen(Qt::red);
-    painter.setFont(QFont("Arial", 10));
-    if(is_draw == true){
-        int x = 30, y = 50, w = 2000, h = 50;
-        QRect rect(x, y, w, h);
-        QLinearGradient gradient(x, y, x + w, y);
+//    QPainter painter(this);
+//    painter.setPen(Qt::red);
+//    painter.setFont(QFont("Arial", 10));
+//    int x = 30, y = 50, w = 2000, h = 50;
+//    QRect rect(x, y, w, h);
+//    QLinearGradient gradient(x, y, x + w, y);
 
-        // 绘制颜色渐变
-        for (int i = 0; i <= 100; ++i) {
-            double ratio = i / 100.0; // 0.00 ~ 1.0
-            gradient.setColorAt(ratio, stColor(ratio * (dmax - dmin) + dmin, dmin, dmax));
-        }
+//    // 绘制颜色渐变
+//    for (int i = 0; i <= 100; ++i) {
+//        double ratio = i / 100.0; // 0.00 ~ 1.0
+//        gradient.setColorAt(ratio, stColor(ratio * (params->max_v - params->min_v) + params->min_v, params->min_v, params->max_v));
+//    }
 
-        painter.setBrush(gradient);
-        painter.setPen(Qt::black);
-        painter.drawRect(rect);
-        painter.setPen(Qt::white);
-        painter.setFont(QFont("Arial", 6));
-        for (int i = 0; i < 10; ++i) {
-            double ratio = i / 10.0;
-            int tick_x = x + static_cast<int>(ratio * w);
-            float value = dmin + ratio * (dmax - dmin);
-            QString text = QString::number(value, 'f', 1); // 保留1位小数
-            int text_width = painter.fontMetrics().width(text);
-            painter.drawText(tick_x - text_width / 2, y + h + 15, text);
-            painter.drawLine(tick_x, y + h, tick_x, y + h + 5);
-        }
-    }
-    //    int count = 0;
-    //    for (const auto& v : getEdgeVertices(modelData,num_x,num_y,num_z)) {
-    //        QVector4D worldPos(v.position, 1.0f);
-    //        QVector4D clipPos = projection * view * model * worldPos;
-    //        clipPos /= clipPos.w();
-    //        if (clipPos.z() < -1.0f || clipPos.z() > 1.0f) continue;
-    //        if (clipPos.x() < -1.0f || clipPos.x() > 1.0f ||
-    //                clipPos.y() < -1.0f || clipPos.y() > 1.0f) continue;
-    //        QPoint screenPos = projectToScreen(v.position, model, view, projection);
-    //        if(count < 4 * num_x - 4) painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.x(), 0), 0, 'f', 2));
-    //        else if(count < 4*num_x + 4 * num_y - 8) painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.y(), 0), 0, 'f', 2));
-    //        else painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.z(), 0), 0, 'f', 2));
-    //        ++count;
-    //    }
-    //    painter.setPen(Qt::white);
-    //    for (const auto& v : axisData) {
-    //        QPoint screenPos = projectToScreen(v.position, model, view, projection);
-    //        if (screenPos == QPoint(-1000, -1000)) continue;
-    //        painter.drawText(screenPos, QString("(%1,%2,%3)")
-    //                         .arg(outtoin(v.position.x(), 0), 0, 'f', 2)
-    //                         .arg(outtoin(v.position.y(), 1), 0, 'f', 2)
-    //                         .arg(outtoin(v.position.z(), 2), 0, 'f', 2));
-    //    }
+//    painter.setBrush(gradient);
+//    painter.setPen(Qt::black);
+//    painter.drawRect(rect);
+//    painter.setPen(Qt::white);
+//    painter.setFont(QFont("Arial", 6));
+//    for (int i = 0; i < 10; ++i) {
+//        double ratio = i / 10.0;
+//        int tick_x = x + static_cast<int>(ratio * w);
+//        float value = params->min_v + ratio * (params->max_v - params->min_v);
+//        QString text = QString::number(value, 'f', 1); // 保留1位小数
+//        int text_width = painter.fontMetrics().width(text);
+//        painter.drawText(tick_x - text_width / 2, y + h + 15, text);
+//        painter.drawLine(tick_x, y + h, tick_x, y + h + 5);
+//    }
+//        int count = 0;
+//        for (const auto& v : getEdgeVertices(modelData,params->axisCount[0],params->axisCount[1],params->axisCount[2])) {
+//            QVector4D worldPos(v.position, 1.0f);
+//            QVector4D clipPos = projection * view * model * worldPos;
+//            clipPos /= clipPos.w();
+//            if (clipPos.z() < -1.0f || clipPos.z() > 1.0f) continue;
+//            if (clipPos.x() < -1.0f || clipPos.x() > 1.0f ||
+//                    clipPos.y() < -1.0f || clipPos.y() > 1.0f) continue;
+//            QPoint screenPos = projectToScreen(v.position, model, view, projection);
+//            if(count < 4 * params->axisCount[0] - 4) painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.x(), 0), 0, 'f', 2));
+//            else if(count < 4*params->axisCount[0] + 4 * params->axisCount[1] - 8) painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.y(), 0), 0, 'f', 2));
+//            else painter.drawText(screenPos, QString("%1").arg(outtoin(v.position.z(), 0), 0, 'f', 2));
+//            ++count;
+//        }
+//        painter.setPen(Qt::white);
+//        for (const auto& v : axisData) {
+//            QPoint screenPos = projectToScreen(v.position, model, view, projection);
+//            if (screenPos == QPoint(-1000, -1000)) continue;
+//            painter.drawText(screenPos, QString("(%1,%2,%3)")
+//                             .arg(outtoin(v.position.x(), 0), 0, 'f', 2)
+//                             .arg(outtoin(v.position.y(), 1), 0, 'f', 2)
+//                             .arg(outtoin(v.position.z(), 2), 0, 'f', 2));
+//        }
 
 
-    painter.end();
+//    painter.end();
 }
 
 // 调用完此函数后，再 update 中先绑定 Slice_VAO, 再 glDrawElements(GL_TRIANGLES, Slice_idx.size(), GL_UNSIGNED_INT, 0);
 void znnwidget::getPlaneIndex(unsigned st_x, unsigned st_y, unsigned st_z, unsigned en_x, unsigned en_y, unsigned en_z, QVector<unsigned> &idx)
 {
-    // (x, y, z) -> ((num_y * num_z) * x + num_z * y + z)
+    // (x, y, z) -> ((params->axisCount[1] * params->axisCount[2]) * x + params->axisCount[2] * y + z)
     unsigned d_fst = 0, d_sec = 0;
     if (st_x == en_x) {
         en_x++;
-        d_fst = num_z, d_sec = 1u;
+        d_fst = params->axisCount[2], d_sec = 1u;
     }
     else if (st_y == en_y) {
         en_y++;
-        d_fst = num_y * num_z, d_sec = 1u;
+        d_fst = params->axisCount[1] * params->axisCount[2], d_sec = 1u;
     }
     else if (st_z == en_z) {
         en_z++;
-        d_fst = num_y * num_z, d_sec = num_z;
+        d_fst = params->axisCount[1] * params->axisCount[2], d_sec = params->axisCount[2];
     }
     else {
         // 说明传入的不是一个平面
@@ -359,7 +295,7 @@ void znnwidget::getPlaneIndex(unsigned st_x, unsigned st_y, unsigned st_z, unsig
     for (unsigned x = st_x; x < en_x; x++) {
         for (unsigned y = st_y; y < en_y; y++) {
             for (unsigned z = st_z; z < en_z; z++) {
-                unsigned base = (num_y * num_z) * x + num_z * y + z;
+                unsigned base = (params->axisCount[1] * params->axisCount[2]) * x + params->axisCount[2] * y + z;
                 // 传入右上角和左下角两个三角形顶点在 Data_VBO 中的位置
                 idx << base << base + d_sec << base + d_fst + d_sec;
                 idx << base << base + d_fst << base + d_fst + d_sec;
@@ -376,12 +312,12 @@ void znnwidget::getSurfaceIndex()
 
     makeCurrent();
     Surface_idx.clear();
-    getPlaneIndex(0u, 0u, 0u, num_x - 1, num_y - 1, 0u, Surface_idx);
-    getPlaneIndex(0u, 0u, 0u, num_x - 1, 0u, num_z - 1, Surface_idx);
-    getPlaneIndex(0u, 0u, 0u, 0u, num_y - 1, num_z - 1, Surface_idx);
-    getPlaneIndex(num_x - 1, 0u, 0u, num_x - 1, num_y - 1, num_z - 1, Surface_idx);
-    getPlaneIndex(0u, num_y - 1, 0u, num_x - 1, num_y - 1, num_z - 1, Surface_idx);
-    getPlaneIndex(0u, 0u, num_z - 1, num_x - 1, num_y - 1, num_z - 1, Surface_idx);
+    getPlaneIndex(0u, 0u, 0u, params->axisCount[0] - 1, params->axisCount[1] - 1, 0u, Surface_idx);
+    getPlaneIndex(0u, 0u, 0u, params->axisCount[0] - 1, 0u, params->axisCount[2] - 1, Surface_idx);
+    getPlaneIndex(0u, 0u, 0u, 0u, params->axisCount[1] - 1, params->axisCount[2] - 1, Surface_idx);
+    getPlaneIndex(params->axisCount[0] - 1, 0u, 0u, params->axisCount[0] - 1, params->axisCount[1] - 1, params->axisCount[2] - 1, Surface_idx);
+    getPlaneIndex(0u, params->axisCount[1] - 1, 0u, params->axisCount[0] - 1, params->axisCount[1] - 1, params->axisCount[2] - 1, Surface_idx);
+    getPlaneIndex(0u, 0u, params->axisCount[2] - 1, params->axisCount[0] - 1, params->axisCount[1] - 1, params->axisCount[2] - 1, Surface_idx);
 
     Surface_VAO.bind();
     Surface_EBO.bind();
@@ -399,13 +335,13 @@ void znnwidget::getSliceIndex(int type, unsigned l)
 
     switch (type) { // 保持跟下拉框中的序号一致
     case 2:         // 沿 X 轴方向移动的 YZ 平面
-        getPlaneIndex(l, 0u, 0u, l, num_y - 1, num_z - 1, Slice_idx);
+        getPlaneIndex(l, 0u, 0u, l, params->axisCount[1] - 1, params->axisCount[2] - 1, Slice_idx);
         break;
     case 3:         // 沿 Y 轴方向移动的 XZ 平面
-        getPlaneIndex(0u, l, 0u, num_x - 1, l, num_z - 1, Slice_idx);
+        getPlaneIndex(0u, l, 0u, params->axisCount[0] - 1, l, params->axisCount[2] - 1, Slice_idx);
         break;
     case 4:         // 沿 Z 轴方向移动的 XY 平面
-        getPlaneIndex(0u, 0u, l, num_x - 1, num_y - 1, l, Slice_idx);
+        getPlaneIndex(0u, 0u, l, params->axisCount[0] - 1, params->axisCount[1] - 1, l, Slice_idx);
         break;
     default:
         break;
@@ -434,14 +370,14 @@ void znnwidget::gshzb()
     //    float scale[3];      // 保存归一化后的比例
     // 计算每一对的差值
     for (int i = 0; i < 3; ++i) {
-        range[i] = max_[i] - min_[i];
+        range[i] = params->getDiff(i);
     }
     // 找出最大范围值
     float max_range = std::max({range[0], range[1], range[2]});
     // 按比例归一化，最大者为 1，其他按比例缩放
-    Axis_x = range[0] / max_range;
-    Axis_y = range[1] / max_range;
-    Axis_z = range[2] / max_range;
+    for (int i=  0; i < 3; i++) {
+        Axis_[i] = range[i] / max_range;
+    }
 }
 
 std::vector<VertexData> znnwidget::getEdgeVertices(const std::vector<VertexData> &data, int Nx, int Ny, int Nz)
@@ -473,13 +409,6 @@ std::vector<VertexData> znnwidget::getEdgeVertices(const std::vector<VertexData>
     }
 
     return result;
-}
-
-void znnwidget::drawColor(float dmi, float dma,bool f)
-{
-    is_draw = f;
-    dmin = dmi;
-    dmax = dma;
 }
 
 
@@ -516,22 +445,29 @@ void znnwidget::resetData()
 {
     axisData.clear();
     modelData.clear();
+    modelData.reserve(params->getScale());
+}
+
+void znnwidget::getData(int pos, float v)
+{
+    modelData.push_back(VertexData(params->getRealPos(pos), stColor(v, params->min_v, params->max_v)));
 }
 
 void znnwidget::processData()
 {
+    makeCurrent();
     // 处理坐标轴
     gshzb();
     // 前面
-    axisData.push_back(VertexData({ -Axis_x, -Axis_y,  Axis_z })); // 0
-    axisData.push_back(VertexData({  Axis_x, -Axis_y,  Axis_z })); // 1
-    axisData.push_back(VertexData({  Axis_x,  Axis_y,  Axis_z })); // 2
-    axisData.push_back(VertexData({ -Axis_x,  Axis_y,  Axis_z })); // 3
+    axisData.push_back(VertexData({ -Axis_[0], -Axis_[1],  Axis_[2] })); // 0
+    axisData.push_back(VertexData({  Axis_[0], -Axis_[1],  Axis_[2] })); // 1
+    axisData.push_back(VertexData({  Axis_[0],  Axis_[1],  Axis_[2] })); // 2
+    axisData.push_back(VertexData({ -Axis_[0],  Axis_[1],  Axis_[2] })); // 3
     // 后面
-    axisData.push_back(VertexData({ -Axis_x, -Axis_y, -Axis_z })); // 4
-    axisData.push_back(VertexData({  Axis_x, -Axis_y, -Axis_z })); // 5
-    axisData.push_back(VertexData({  Axis_x,  Axis_y, -Axis_z })); // 6
-    axisData.push_back(VertexData({ -Axis_x,  Axis_y, -Axis_z })); // 7
+    axisData.push_back(VertexData({ -Axis_[0], -Axis_[1], -Axis_[2] })); // 4
+    axisData.push_back(VertexData({  Axis_[0], -Axis_[1], -Axis_[2] })); // 5
+    axisData.push_back(VertexData({  Axis_[0],  Axis_[1], -Axis_[2] })); // 6
+    axisData.push_back(VertexData({ -Axis_[0],  Axis_[1], -Axis_[2] })); // 7
     Axis_VBO.bind();
     Axis_VBO.allocate(axisData.data(), sizeof(VertexData) * (unsigned)(axisData.size()));
     Axis_VBO.release();
@@ -543,10 +479,13 @@ void znnwidget::processData()
     Data_VBO.bind();
     Data_VBO.allocate(modelData.data(), sizeof(VertexData) * (unsigned)(modelData.size()));
     Data_VBO.release();
+
+    doneCurrent();
+    update();
 }
 QColor znnwidget::stColor(float a, float mn, float mx) {
     // 根据速度的最大值和最小值将该节点的速度值归一化到[0.0, 1.0]
-    double t = (a - mn) / (mx - mn);
+    double t = (mx - a) / (mx - mn);
     if (t < 0.0) t = 0.0;
     if (t > 1.0) t = 1.0;
     // 使用 HSL 颜色进行过度
