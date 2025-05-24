@@ -35,8 +35,11 @@ public:
     float radius;
     float minPoint;
 
-    int chkData();                   // 检查参数的合法性
     bool writeConfig();              // 写数据到 config.ini
+
+private:
+    static constexpr int LimitScale = 10000000; // 1e7
+    bool chkData();                   // 检查参数的合法性
 };
 
 #endif // PARAMS_H

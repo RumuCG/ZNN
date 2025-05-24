@@ -1,9 +1,11 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QVBoxLayout>
-#include <params.h>
+#include "params.h"
 #include <QFileInfo>
 #include <QProcess>
+#include <QDir>
+#include <QFileDialog>
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -15,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     qDebug() << "out setupui";
     ui->openGLWidget->initParams(params);
-
+    ui->statusBar->showMessage("当前未读取文件");
 }
 
 MainWindow::~MainWindow()
@@ -23,7 +25,7 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::on_actdrawrect_triggered()
+void MainWindow::MainWindow::on_drawModel_triggered()
 {
     if (not params->writeConfig()) {
         qDebug() << "fail to write config.ini";
@@ -31,6 +33,7 @@ void MainWindow::on_actdrawrect_triggered()
     else {
         qDebug() << "write config.ini successfully";
 
+        // 尝试启动差值程序
         QString programPath = QCoreApplication::applicationDirPath() + "/1DIPL.exe";
         if (!QFileInfo::exists(programPath)) {
             qWarning() << "1DIPL.exe 不存在：" << programPath;
@@ -53,16 +56,10 @@ void MainWindow::on_actdrawrect_triggered()
         int exitCode = process.exitCode();
         qDebug() << "执行完成，退出码：" << exitCode;
 
-        if (exitCode == 0) {
+        if (exitCode == 0) {    // 正常退出才开始读取文件
             fileRead = readFile(QCoreApplication::applicationDirPath() + "/" +params->outputFileName);
         }
     }
-//    fileRead = readFile(QCoreApplication::applicationDirPath() + "/" +params->outputFileName);
-}
-
-void MainWindow::on_actclear_triggered()
-{
-
 }
 
 void MainWindow::on_actxc_triggered()
@@ -70,8 +67,6 @@ void MainWindow::on_actxc_triggered()
     ui->openGLWidget->is_xc = ui->actxc->isChecked();
     update();
 }
-
-
 
 void MainWindow::on_horizontalSlider_valueChanged(int value)
 {
@@ -111,7 +106,7 @@ void MainWindow::on_DisplayMode_currentIndexChanged(int index)
 {
     bool enable = (index > 1);
     ui->PostionSlider->setEnabled(enable);
-    ui->PositionBox->setEnabled(enable);
+//    ui->PositionBox->setEnabled(enable);
 
     if (index == 0) {   // NULL 啥都不干
         ui->PostionSlider->setValue(0);
@@ -200,7 +195,6 @@ bool MainWindow::readFile(const QString &FileName)
                           .split('\n', QString::SkipEmptyParts);    // 只将非空行存到lines里面
 
 
-
     ui->openGLWidget->resetData();
 
     unsigned pos = 0; // 记录坐标
@@ -237,4 +231,70 @@ void MainWindow::on_colorshow_triggered()
 {
 //    ui->openGLWidget->is_draw = ui-> colorshow ->isChecked();
 //    update();
+}
+
+// <<---                根据界面输入值设定对应的参数              --->>
+
+void MainWindow::on_doubleSpinBox_X_Min_editingFinished()
+{
+    params->axisMin[0] = static_cast<float>(ui->doubleSpinBox_X_Min->value());
+}
+void MainWindow::on_doubleSpinBox_X_Step_editingFinished()
+{
+    params->axisStep[0] = static_cast<float>(ui->doubleSpinBox_X_Step->value());
+}
+void MainWindow::on_spinBox_X_Count_editingFinished()
+{
+    params->axisCount[0] = ui->spinBox_X_Count->value();
+}
+
+void MainWindow::on_doubleSpinBox_Y_Min_editingFinished()
+{
+    params->axisMin[1] = static_cast<float>(ui->doubleSpinBox_Y_Min->value());
+}
+void MainWindow::on_doubleSpinBox_Y_Step_editingFinished()
+{
+    params->axisStep[1] = static_cast<float>(ui->doubleSpinBox_Y_Step->value());
+}
+void MainWindow::on_spinBox_Y_Count_editingFinished()
+{
+    params->axisCount[1] = ui->spinBox_Y_Count->value();
+}
+
+void MainWindow::on_doubleSpinBox_Z_Min_editingFinished()
+{
+    params->axisMin[2] = static_cast<float>(ui->doubleSpinBox_Z_Min->value());
+}
+void MainWindow::on_doubleSpinBox_Z_Step_editingFinished()
+{
+    params->axisStep[2] = static_cast<float>(ui->doubleSpinBox_Z_Step->value());
+}
+void MainWindow::on_spinBox_Z_Count_editingFinished()
+{
+    params->axisCount[2] = ui->spinBox_Z_Count->value();
+}
+
+// <<---                根据界面输入值设定对应的参数              --->>
+
+void MainWindow::on_openFile_triggered()
+{
+    // 获取应用目录下的1DIPL文件夹路径
+    QString dataDir = QDir(QCoreApplication::applicationDirPath())
+                     .filePath("1DIPL");
+
+    // 如果不存在就创建
+    QDir().mkpath(dataDir);
+
+    // 打开文件对话框
+    QString fileName = QFileDialog::getOpenFileName(
+        this,
+        "选择源文件",
+        dataDir,  // 初始目录
+        "文本文件 (*.txt)" // 过滤器
+    );
+
+    if (!fileName.isEmpty()) {
+        params->inputFileName = fileName;
+        ui->statusBar->showMessage("当前文件：" + fileName);
+    }
 }

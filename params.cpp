@@ -3,30 +3,24 @@
 #include <QCoreApplication>
 #include <QTextStream>
 #include <QDebug>
+#include <QMessageBox>
 Params::Params(QObject *parent) :
     QObject(parent)
 {
     outputFileName = "velocity_model.txt";
-    inputFileName = "1-7well.txt";
-    min_v = 5200.0f;
-    max_v = 3700.0f;
+    inputFileName = "";
+    min_v = 0.0f;
+    max_v = 0.0f;
 
-    // test start
+    for (int i = 0; i < 3; i++) {
+        axisMin[i] = 0.0f;
+        axisStep[i] = 0.0f;
+        axisCount[i] = 0;
+    }
 
-    axisMin[0] = 0.0f;
-    axisMin[1] = -500.0f;
-    axisMin[2] = 2640.0f;
-
-    axisStep[0] = axisStep[1] = axisStep[2] = 40.0f;
-
-    axisCount[0] = axisCount[1] = 25;
-    axisCount[2] = 24;
-
-    interpPower = 2.0f;
-    radius = 50.0f;
-    minPoint = 5.0f;
-
-    // test end
+    interpPower = 0.0f;
+    radius = 0.0f;
+    minPoint = 0.0f;
 }
 
 float Params::getDiff(int i)
@@ -55,21 +49,46 @@ void Params::setValueRange(float min, float max)
     max_v = max;
 }
 
-int Params::chkData()
+bool Params::chkData()
 {
-    return 0;
+    for (int i = 0; i < 3; i++) {
+        qDebug() << axisMin[i] << ' ' << axisStep[i] << ' ' << axisCount[i];
+    }
+    long long scale = 1ll * axisCount[0] * axisCount[1] * axisCount[2];
+    if (scale == 0 || scale > LimitScale) { // 数据规模问题
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setWindowTitle("参数警告");
+        msgBox.setText(QString("数据规模 %1 不在有效范围 [1 - %2] 之间！")
+                      .arg(scale).arg(LimitScale));
+        msgBox.setInformativeText("请调整输入参数");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.exec();
+        return false;
+    }
+
+    if (axisStep[0] * axisStep[0] * axisStep[0] == 0.0f) { // 数据步长问题
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setWindowTitle("参数警告");
+        msgBox.setText(QString("数据的步长不能为 0"));
+        msgBox.setInformativeText("请调整输入参数");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.exec();
+        return false;
+    }
+//    return false;
+    return true;
 }
 
 bool Params::writeConfig()
 {
     // 检查数据合法性
-    switch (chkData()) {
-    case 0:
-        break;
-    default:
+    if (!chkData()) {
         return false;
     }
 
+    // 根据参数创建config.ini
     QFile file(QCoreApplication::applicationDirPath() + "/config.ini");
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         qDebug() << "fail to open " << (QCoreApplication::applicationDirPath() + "/config.ini");

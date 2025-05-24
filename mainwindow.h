@@ -17,11 +17,8 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_actdrawrect_triggered();
 
-    void on_actclear_triggered();
     void on_actxc_triggered();
-
 
     void on_horizontalSlider_valueChanged(int value); //缩放滑杆
 
@@ -35,15 +32,36 @@ private slots:
 
     void on_DisplayMode_currentIndexChanged(int index);
 
-//    void on_PostionSlider_sliderMoved(int position);
-
     void on_PostionSlider_valueChanged(int value);
 
     void on_colorshow_triggered();
 
+    void on_doubleSpinBox_X_Min_editingFinished();
+
+    void on_doubleSpinBox_Y_Min_editingFinished();
+
+    void on_doubleSpinBox_X_Step_editingFinished();
+
+    void on_spinBox_X_Count_editingFinished();
+
+    void on_doubleSpinBox_Y_Step_editingFinished();
+
+    void on_spinBox_Y_Count_editingFinished();
+
+    void on_doubleSpinBox_Z_Min_editingFinished();
+
+    void on_doubleSpinBox_Z_Step_editingFinished();
+
+    void on_spinBox_Z_Count_editingFinished();
+
+    void on_openFile_triggered();
+
+    void on_drawModel_triggered();
+
 private:
     Ui::MainWindow *ui;
     Params *params;
+
     bool fileRead; // 标志是否读入了文件
     bool readFile(const QString &FileName);
 };
