@@ -83,7 +83,6 @@ void MainWindow::MainWindow::on_drawModel_triggered()
 
         if (exitCode == 0) {    // 正常退出才开始读取文件
             qDebug() << "正常退出";
-//            return;
             fileRead = readFile(QCoreApplication::applicationDirPath() + "/1DIPL/" + params->outputFileName);
         }
     }
@@ -114,17 +113,14 @@ bool MainWindow::readFile(const QString &FileName)
             continue;
         }
 
-//        if (headLine) {                         // 第一行读入最值
-//            params->setValueRange(valueList[0].toFloat(), valueList[1].toFloat());
-//            headLine = false;
-//        }
-//        else {
-//            for (const QString &v : valueList) {
-//                ui->openGLWidget->getData(pos++, v.toFloat());
-//            }
-//        }
-        for (const QString &v : valueList) {
-            ui->openGLWidget->getData(pos++, v.toFloat());
+        if (headLine) {                         // 第一行读入最值
+            params->setValueRange(valueList[0].toFloat(), valueList[1].toFloat());
+            headLine = false;
+        }
+        else {
+            for (const QString &v : valueList) {
+                ui->openGLWidget->getData(pos++, v.toFloat());
+            }
         }
     }
 
