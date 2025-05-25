@@ -33,7 +33,7 @@ public:
     // IPL信息 // 不懂
     float interpPower;
     float radius;
-    float minPoint;
+    int minPoint;
 
     bool writeConfig();              // 写数据到 config.ini
 

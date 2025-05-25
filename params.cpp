@@ -7,10 +7,10 @@
 Params::Params(QObject *parent) :
     QObject(parent)
 {
-    outputFileName = "velocity_model.txt";
+    outputFileName = "velocity_model.vpr";
     inputFileName = "";
-    min_v = 0.0f;
-    max_v = 0.0f;
+    min_v = 5300.0f;
+    max_v = 3700.0f;
 
     for (int i = 0; i < 3; i++) {
         axisMin[i] = 0.0f;
@@ -77,6 +77,17 @@ bool Params::chkData()
         msgBox.exec();
         return false;
     }
+
+    if (inputFileName.size() == 0) {
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Warning);
+        msgBox.setWindowTitle("参数警告");
+        msgBox.setText(QString("还未选择源文件！"));
+        msgBox.setInformativeText("请先选择源文件");
+        msgBox.setStandardButtons(QMessageBox::Ok);
+        msgBox.exec();
+        return false;
+    }
 //    return false;
     return true;
 }
@@ -89,9 +100,9 @@ bool Params::writeConfig()
     }
 
     // 根据参数创建config.ini
-    QFile file(QCoreApplication::applicationDirPath() + "/config.ini");
+    QFile file(QCoreApplication::applicationDirPath() + "/1DIPL/config.ini");
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qDebug() << "fail to open " << (QCoreApplication::applicationDirPath() + "/config.ini");
+        qDebug() << "fail to open " << (QCoreApplication::applicationDirPath() + "/1DIPL/config.ini");
         return false;
     }
 

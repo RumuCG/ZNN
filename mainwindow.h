@@ -58,6 +58,12 @@ private slots:
 
     void on_drawModel_triggered();
 
+    void on_doubleSpinBox_interp_power_editingFinished();
+
+    void on_doubleSpinBox_radius_editingFinished();
+
+    void on_spinBox_min_points_editingFinished();
+
 private:
     Ui::MainWindow *ui;
     Params *params;

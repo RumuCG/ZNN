@@ -6,6 +6,7 @@
 #include <QProcess>
 #include <QDir>
 #include <QFileDialog>
+#include <QFileInfo>
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
@@ -25,6 +26,29 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::on_openFile_triggered()
+{
+    // 获取应用目录下的1DIPL文件夹路径
+    QString dataDir = QDir(QCoreApplication::applicationDirPath())
+                     .filePath("1DIPL");
+
+    // 如果不存在就创建
+    QDir().mkpath(dataDir);
+
+    // 打开文件对话框
+    QString filePath = QFileDialog::getOpenFileName(
+        this,
+        "选择源文件",
+        dataDir,  // 初始目录
+        "文本文件 (*.txt)" // 过滤器
+    );
+
+    if (!filePath.isEmpty()) {
+        params->inputFileName = QFileInfo(filePath).fileName();
+        ui->statusBar->showMessage("当前文件：" + filePath);
+    }
+}
+
 void MainWindow::MainWindow::on_drawModel_triggered()
 {
     if (not params->writeConfig()) {
@@ -34,15 +58,16 @@ void MainWindow::MainWindow::on_drawModel_triggered()
         qDebug() << "write config.ini successfully";
 
         // 尝试启动差值程序
-        QString programPath = QCoreApplication::applicationDirPath() + "/1DIPL.exe";
+        QString programPath = QCoreApplication::applicationDirPath() + "/1DIPL/1DIPL.exe";
         if (!QFileInfo::exists(programPath)) {
             qWarning() << "1DIPL.exe 不存在：" << programPath;
             return;
         }
 
         QProcess process;
-        process.setWorkingDirectory(QCoreApplication::applicationDirPath());
-        process.execute(programPath, QStringList()); // 传递空参数给 1DIPL.exe
+        process.setProgram(programPath);
+        process.setWorkingDirectory(QCoreApplication::applicationDirPath() + "/1DIPL");
+        process.start();
 
         if (!process.waitForStarted(3000)) {
             qWarning() << "程序启动失败：" << process.errorString();
@@ -57,9 +82,58 @@ void MainWindow::MainWindow::on_drawModel_triggered()
         qDebug() << "执行完成，退出码：" << exitCode;
 
         if (exitCode == 0) {    // 正常退出才开始读取文件
-            fileRead = readFile(QCoreApplication::applicationDirPath() + "/" +params->outputFileName);
+            qDebug() << "正常退出";
+//            return;
+            fileRead = readFile(QCoreApplication::applicationDirPath() + "/1DIPL/" + params->outputFileName);
         }
     }
+}
+
+bool MainWindow::readFile(const QString &FileName)
+{
+    qDebug() << "reading File\n";
+    // 以只读方式打开数据文件
+    QFile dataFile(FileName);
+    qDebug() << "ready to read " << FileName << '\n';
+    if (not dataFile.open(QIODevice::ReadOnly | QIODevice::Text)) { // QIODevice::Text 处理换行符号
+        qDebug() << "Fail to read File " << FileName << '\n';
+        return false;
+    }
+    QTextStream in(&dataFile);
+    QStringList lines = in.readAll()                                // 读取所有行
+                          .split('\n', QString::SkipEmptyParts);    // 只将非空行存到lines里面
+
+
+    ui->openGLWidget->resetData();
+
+    unsigned pos = 0; // 记录坐标
+    bool headLine = true; // 特殊处理第一行
+    for (const QString &line : lines) {
+        QStringList valueList = line.split(' ', QString::SkipEmptyParts);
+        if (valueList.empty()) {
+            continue;
+        }
+
+//        if (headLine) {                         // 第一行读入最值
+//            params->setValueRange(valueList[0].toFloat(), valueList[1].toFloat());
+//            headLine = false;
+//        }
+//        else {
+//            for (const QString &v : valueList) {
+//                ui->openGLWidget->getData(pos++, v.toFloat());
+//            }
+//        }
+        for (const QString &v : valueList) {
+            ui->openGLWidget->getData(pos++, v.toFloat());
+        }
+    }
+
+    qDebug() << "File read ok !\n" << ui->openGLWidget->modelData.size() << " datas Read\n";
+
+    ui->openGLWidget->processData();
+
+    dataFile.close();
+    return true;
 }
 
 void MainWindow::on_actxc_triggered()
@@ -180,53 +254,6 @@ void MainWindow::on_PostionSlider_valueChanged(int p)
     }
 }
 
-bool MainWindow::readFile(const QString &FileName)
-{
-    qDebug() << "reading File\n";
-    // 以只读方式打开数据文件
-    QFile dataFile(FileName);
-    qDebug() << "ready to read " << FileName << '\n';
-    if (not dataFile.open(QIODevice::ReadOnly | QIODevice::Text)) { // QIODevice::Text 处理换行符号
-        qDebug() << "Fail to read File " << FileName << '\n';
-        return false;
-    }
-    QTextStream in(&dataFile);
-    QStringList lines = in.readAll()                                // 读取所有行
-                          .split('\n', QString::SkipEmptyParts);    // 只将非空行存到lines里面
-
-
-    ui->openGLWidget->resetData();
-
-    unsigned pos = 0; // 记录坐标
-    bool headLine = true; // 特殊处理第一行
-    for (const QString &line : lines) {
-        QStringList valueList = line.split(' ', QString::SkipEmptyParts);
-        if (valueList.empty()) {
-            continue;
-        }
-
-//        if (headLine) {                         // 第一行读入最值
-//            params->setValueRange(valueList[0].toFloat(), valueList[1].toFloat());
-//            headLine = false;
-//        }
-//        else {
-//            for (const QString &v : valueList) {
-//                ui->openGLWidget->getData(pos++, v.toFloat());
-//            }
-//        }
-        for (const QString &v : valueList) {
-            ui->openGLWidget->getData(pos++, v.toFloat());
-        }
-    }
-
-    qDebug() << "File read ok !\n" << ui->openGLWidget->modelData.size() << " datas Read\n";
-
-    ui->openGLWidget->processData();
-
-    dataFile.close();
-    return true;
-}
-
 void MainWindow::on_colorshow_triggered()
 {
 //    ui->openGLWidget->is_draw = ui-> colorshow ->isChecked();
@@ -274,27 +301,20 @@ void MainWindow::on_spinBox_Z_Count_editingFinished()
     params->axisCount[2] = ui->spinBox_Z_Count->value();
 }
 
+void MainWindow::on_doubleSpinBox_interp_power_editingFinished()
+{
+    params->interpPower = static_cast<float>(ui->doubleSpinBox_interp_power->value());
+}
+
+void MainWindow::on_doubleSpinBox_radius_editingFinished()
+{
+    params->radius = static_cast<float>(ui->doubleSpinBox_radius->value());
+}
+
+void MainWindow::on_spinBox_min_points_editingFinished()
+{
+    params->minPoint = ui->spinBox_min_points->value();
+}
+
 // <<---                根据界面输入值设定对应的参数              --->>
 
-void MainWindow::on_openFile_triggered()
-{
-    // 获取应用目录下的1DIPL文件夹路径
-    QString dataDir = QDir(QCoreApplication::applicationDirPath())
-                     .filePath("1DIPL");
-
-    // 如果不存在就创建
-    QDir().mkpath(dataDir);
-
-    // 打开文件对话框
-    QString fileName = QFileDialog::getOpenFileName(
-        this,
-        "选择源文件",
-        dataDir,  // 初始目录
-        "文本文件 (*.txt)" // 过滤器
-    );
-
-    if (!fileName.isEmpty()) {
-        params->inputFileName = fileName;
-        ui->statusBar->showMessage("当前文件：" + fileName);
-    }
-}
