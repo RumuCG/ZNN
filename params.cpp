@@ -1,3 +1,4 @@
+
 #include "params.h"
 #include <QFile>
 #include <QCoreApplication>

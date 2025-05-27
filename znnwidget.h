@@ -36,19 +36,19 @@ public:
     // 以同步数据
     void initParams(Params *p = nullptr);
 
-    float angleX = 0.0f; // 旋转角度 各轴
+    float angleX = 90.0f; // 旋转角度 各轴
     float angleY = 0.0f;
-    float angleZ = 0.0f;
+    float angleZ = 300.0f;
     float offsetX = 0.0f;// 上移量
     float offsetY = 0.0f; // 下移量
-    float scalen = 1.0f; // 缩放比例
+    float scalen = 0.5f; // 缩放比例
     enum Shape{ None, Surface, SliceXY, SliceXZ, SliceYZ, CntShape };
     void setShape(Shape shape);// 对外接口
 
     void recover(); // 复原坐标系
     void keyPressEvent(QKeyEvent *event);
     bool is_xc = false;
-
+    bool is_draw = false;
     std::vector<VertexData> axisData;  // 坐标系再屏幕上的位置
     std::vector<VertexData> modelData; // 每个点的数据
     void resetData();                  // 重置所有数据，并预存空间
@@ -66,10 +66,10 @@ public:
     void getSliceIndex(int type, unsigned l);
     void gshData(std::vector<VertexData>&);
     void gshzb();
-
+    std::vector<unsigned> slice_situation;
     std::vector<VertexData> getEdgeVertices(const std::vector<VertexData>& data, int Nx, int Ny, int Nz);
     QColor stColor(float a, float mn, float mx);
-
+    std::vector<unsigned> corners;
     ~znnwidget();
 protected:
     virtual void initializeGL();

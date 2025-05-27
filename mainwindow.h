@@ -17,7 +17,7 @@ public:
     ~MainWindow();
 
 private slots:
-
+    void datatest();
     void on_actxc_triggered();
 
     void on_horizontalSlider_valueChanged(int value); //缩放滑杆

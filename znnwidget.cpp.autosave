@@ -544,7 +544,6 @@ void znnwidget::paintGL()
         Axis_VAO.destroy();
         Axis_VBO.destroy();
         Axis_EBO.destroy();
-
         Data_VBO.destroy();
         Surface_VAO.destroy();
         Surface_EBO.destroy();

@@ -56,7 +56,10 @@ void MainWindow::MainWindow::on_drawModel_triggered()
     }
     else {
         qDebug() << "write config.ini successfully";
-
+        ui->horizontalSlider->setValue(50);
+        ui->horizontalSlider_2->setValue(90);
+        ui->horizontalSlider_3->setValue(0);
+        ui->horizontalSlider_4->setValue(300);
         // 尝试启动差值程序
         QString programPath = QCoreApplication::applicationDirPath() + "/1DIPL/1DIPL.exe";
         if (!QFileInfo::exists(programPath)) {
@@ -140,7 +143,7 @@ void MainWindow::on_actxc_triggered()
 
 void MainWindow::on_horizontalSlider_valueChanged(int value)
 {
-    ui->openGLWidget->scalen = float(value)*0.02f;
+    ui->openGLWidget->scalen = float(value)*0.01f;
     update();
 }
 
@@ -166,9 +169,9 @@ void MainWindow::on_recover_button_clicked()
 {
     ui->openGLWidget->recover();
     ui->horizontalSlider->setValue(50);
-    ui->horizontalSlider_2->setValue(0);
+    ui->horizontalSlider_2->setValue(90);
     ui->horizontalSlider_3->setValue(0);
-    ui->horizontalSlider_4->setValue(0);
+    ui->horizontalSlider_4->setValue(300);
     update();
 }
 
@@ -252,8 +255,8 @@ void MainWindow::on_PostionSlider_valueChanged(int p)
 
 void MainWindow::on_colorshow_triggered()
 {
-//    ui->openGLWidget->is_draw = ui-> colorshow ->isChecked();
-//    update();
+    ui->openGLWidget->is_draw = ui-> colorshow ->isChecked();
+    update();
 }
 
 // <<---                根据界面输入值设定对应的参数              --->>
