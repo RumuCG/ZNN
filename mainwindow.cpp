@@ -194,7 +194,8 @@ void MainWindow::on_DisplayMode_currentIndexChanged(int index)
         ui->PostionSlider->setValue(0);
         ui->openGLWidget->setShape(ui->openGLWidget->Surface);
         ui->openGLWidget->getSurfaceIndex();
-
+        ui->openGLWidget->slice_situation.clear();
+        update();
         break;
     case 2:             // X 沿X轴显示切片
         ui->PostionSlider->setValue(0);
@@ -317,3 +318,9 @@ void MainWindow::on_spinBox_min_points_editingFinished()
 
 // <<---                根据界面输入值设定对应的参数              --->>
 
+
+void MainWindow::on_action_show_location_triggered()
+{
+    ui->openGLWidget->is_show_location = ui->action_show_location ->isChecked();
+    update();
+}

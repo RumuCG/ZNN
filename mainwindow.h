@@ -64,6 +64,8 @@ private slots:
 
     void on_spinBox_min_points_editingFinished();
 
+    void on_action_show_location_triggered();
+
 private:
     Ui::MainWindow *ui;
     Params *params;

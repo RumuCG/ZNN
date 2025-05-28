@@ -70,6 +70,8 @@ public:
     std::vector<VertexData> getEdgeVertices(const std::vector<VertexData>& data, int Nx, int Ny, int Nz);
     QColor stColor(float a, float mn, float mx);
     std::vector<unsigned> corners;
+    std::vector<VertexData> tick;
+    bool is_show_location = false;
     ~znnwidget();
 protected:
     virtual void initializeGL();

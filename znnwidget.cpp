@@ -244,6 +244,7 @@ void znnwidget::paintGL()
             painter.drawLine(tick_x, y + h, tick_x, y + h + 5);
         }
     }
+
     font.setBold(true);
     painter.setFont(font);
     painter.setPen(Qt::white);
@@ -269,7 +270,11 @@ void znnwidget::paintGL()
             }
         }
 
-
+    }
+    // 打印顶点坐标
+    if(is_show_location){
+        qDebug() << "----";
+        qDebug() << corners.size();
         for (unsigned i = 0; i * 3 < corners.size(); ++i) {
             unsigned x = corners[0 + 3 * i];
             unsigned y = corners[1 + 3 * i];
@@ -292,263 +297,283 @@ void znnwidget::paintGL()
             }
         }
     }
-
-        painter.end();
+    //画刻度
+    int count = 0;
+    for(auto &v:tick){
+        QString text;
+        if(count % 3 == 0) text = QString("-%1").arg(outtoin(v.position.x(), 0), 0, 'f', 2);
+        else if(count % 3 == 1) text = QString("-%1").arg(outtoin(v.position.y(), 1), 0, 'f', 2);
+        else text = QString("-%1").arg(outtoin(v.position.z(), 2), 0, 'f', 2);
+        QPoint screenPos = projectToScreen(v.position, model, view, projection);
+        if (screenPos != QPoint(-1000, -1000)) {
+            //painter.setPen(Qt::red);
+            painter.drawText(screenPos, text);
+        }
+        count ++;
     }
 
-    // 调用完此函数后，再 update 中先绑定 Slice_VAO, 再 glDrawElements(GL_TRIANGLES, Slice_idx.size(), GL_UNSIGNED_INT, 0);
-    void znnwidget::getPlaneIndex(unsigned st_x, unsigned st_y, unsigned st_z, unsigned en_x, unsigned en_y, unsigned en_z, QVector<unsigned> &idx)
-    {
-        slice_situation.clear();
-        slice_situation = {st_x, st_y, st_z, en_x, en_y, en_z};
+    painter.end();
+}
 
-        // (x, y, z) -> ((params->axisCount[1] * params->axisCount[2]) * x + params->axisCount[2] * y + z)
-        unsigned d_fst = 0, d_sec = 0;
-        if (st_x == en_x) {
-            en_x++;
-            d_fst = params->axisCount[2], d_sec = 1u;
-        }
-        else if (st_y == en_y) {
-            en_y++;
-            d_fst = params->axisCount[1] * params->axisCount[2], d_sec = 1u;
-        }
-        else if (st_z == en_z) {
-            en_z++;
-            d_fst = params->axisCount[1] * params->axisCount[2], d_sec = params->axisCount[2];
-        }
-        else {
-            // 说明传入的不是一个平面
-            qDebug() << "error plane";
-            return;
-        }
+// 调用完此函数后，再 update 中先绑定 Slice_VAO, 再 glDrawElements(GL_TRIANGLES, Slice_idx.size(), GL_UNSIGNED_INT, 0);
+void znnwidget::getPlaneIndex(unsigned st_x, unsigned st_y, unsigned st_z, unsigned en_x, unsigned en_y, unsigned en_z, QVector<unsigned> &idx)
+{
+    slice_situation.clear();
+    slice_situation = {st_x, st_y, st_z, en_x, en_y, en_z};
 
-        //Slice_idx.clear();
-        for (unsigned x = st_x; x < en_x; x++) {
-            for (unsigned y = st_y; y < en_y; y++) {
-                for (unsigned z = st_z; z < en_z; z++) {
-                    unsigned base = (params->axisCount[1] * params->axisCount[2]) * x + params->axisCount[2] * y + z;
-                    // 传入右上角和左下角两个三角形顶点在 Data_VBO 中的位置
-                    idx << base << base + d_sec << base + d_fst + d_sec;
-                    idx << base << base + d_fst << base + d_fst + d_sec;
-                }
+    // (x, y, z) -> ((params->axisCount[1] * params->axisCount[2]) * x + params->axisCount[2] * y + z)
+    unsigned d_fst = 0, d_sec = 0;
+    if (st_x == en_x) {
+        en_x++;
+        d_fst = params->axisCount[2], d_sec = 1u;
+    }
+    else if (st_y == en_y) {
+        en_y++;
+        d_fst = params->axisCount[1] * params->axisCount[2], d_sec = 1u;
+    }
+    else if (st_z == en_z) {
+        en_z++;
+        d_fst = params->axisCount[1] * params->axisCount[2], d_sec = params->axisCount[2];
+    }
+    else {
+        // 说明传入的不是一个平面
+        qDebug() << "error plane";
+        return;
+    }
+
+    //Slice_idx.clear();
+    for (unsigned x = st_x; x < en_x; x++) {
+        for (unsigned y = st_y; y < en_y; y++) {
+            for (unsigned z = st_z; z < en_z; z++) {
+                unsigned base = (params->axisCount[1] * params->axisCount[2]) * x + params->axisCount[2] * y + z;
+                // 传入右上角和左下角两个三角形顶点在 Data_VBO 中的位置
+                idx << base << base + d_sec << base + d_fst + d_sec;
+                idx << base << base + d_fst << base + d_fst + d_sec;
             }
         }
     }
+}
 
-    void znnwidget::getSurfaceIndex()
-    {
-        if (not Surface_idx.empty()) {
-            return;
-        }
-
-        makeCurrent();
-        Surface_idx.clear();
-        getPlaneIndex(0u, 0u, 0u, params->axisCount[0] - 1, params->axisCount[1] - 1, 0u, Surface_idx);
-        getPlaneIndex(0u, 0u, 0u, params->axisCount[0] - 1, 0u, params->axisCount[2] - 1, Surface_idx);
-        getPlaneIndex(0u, 0u, 0u, 0u, params->axisCount[1] - 1, params->axisCount[2] - 1, Surface_idx);
-        getPlaneIndex(params->axisCount[0] - 1, 0u, 0u, params->axisCount[0] - 1, params->axisCount[1] - 1, params->axisCount[2] - 1, Surface_idx);
-        getPlaneIndex(0u, params->axisCount[1] - 1, 0u, params->axisCount[0] - 1, params->axisCount[1] - 1, params->axisCount[2] - 1, Surface_idx);
-        getPlaneIndex(0u, 0u, params->axisCount[2] - 1, params->axisCount[0] - 1, params->axisCount[1] - 1, params->axisCount[2] - 1, Surface_idx);
-
-        Surface_VAO.bind();
-        Surface_EBO.bind();
-        Surface_EBO.allocate(Surface_idx.constData(), sizeof(unsigned) * (unsigned)(Surface_idx.size()));
-        Surface_VAO.release();
-        doneCurrent();
-        update();
+void znnwidget::getSurfaceIndex()
+{
+    if (not Surface_idx.empty()) {
+        return;
     }
 
-    void znnwidget::getSliceIndex(int type, unsigned l)
-    {
-        makeCurrent();
+    makeCurrent();
+    Surface_idx.clear();
+    getPlaneIndex(0u, 0u, 0u, params->axisCount[0] - 1, params->axisCount[1] - 1, 0u, Surface_idx);
+    getPlaneIndex(0u, 0u, 0u, params->axisCount[0] - 1, 0u, params->axisCount[2] - 1, Surface_idx);
+    getPlaneIndex(0u, 0u, 0u, 0u, params->axisCount[1] - 1, params->axisCount[2] - 1, Surface_idx);
+    getPlaneIndex(params->axisCount[0] - 1, 0u, 0u, params->axisCount[0] - 1, params->axisCount[1] - 1, params->axisCount[2] - 1, Surface_idx);
+    getPlaneIndex(0u, params->axisCount[1] - 1, 0u, params->axisCount[0] - 1, params->axisCount[1] - 1, params->axisCount[2] - 1, Surface_idx);
+    getPlaneIndex(0u, 0u, params->axisCount[2] - 1, params->axisCount[0] - 1, params->axisCount[1] - 1, params->axisCount[2] - 1, Surface_idx);
 
-        Slice_idx.clear();
+    Surface_VAO.bind();
+    Surface_EBO.bind();
+    Surface_EBO.allocate(Surface_idx.constData(), sizeof(unsigned) * (unsigned)(Surface_idx.size()));
+    Surface_VAO.release();
+    doneCurrent();
+    update();
+}
 
-        switch (type) { // 保持跟下拉框中的序号一致
-        case 2:         // 沿 X 轴方向移动的 YZ 平面
-            getPlaneIndex(l, 0u, 0u, l, params->axisCount[1] - 1, params->axisCount[2] - 1, Slice_idx);
-            break;
-        case 3:         // 沿 Y 轴方向移动的 XZ 平面
-            getPlaneIndex(0u, l, 0u, params->axisCount[0] - 1, l, params->axisCount[2] - 1, Slice_idx);
-            break;
-        case 4:         // 沿 Z 轴方向移动的 XY 平面
-            getPlaneIndex(0u, 0u, l, params->axisCount[0] - 1, params->axisCount[1] - 1, l, Slice_idx);
-            break;
-        default:
-            break;
-        }
+void znnwidget::getSliceIndex(int type, unsigned l)
+{
+    makeCurrent();
 
-        Slice_VAO.bind();
-        Slice_EBO.bind();
-        Slice_EBO.allocate(Slice_idx.constData(), sizeof(unsigned) * (unsigned)(Slice_idx.size()));
-        Slice_VAO.release();
-        doneCurrent();
-        update();
+    Slice_idx.clear();
+
+    switch (type) { // 保持跟下拉框中的序号一致
+    case 2:         // 沿 X 轴方向移动的 YZ 平面
+        getPlaneIndex(l, 0u, 0u, l, params->axisCount[1] - 1, params->axisCount[2] - 1, Slice_idx);
+        break;
+    case 3:         // 沿 Y 轴方向移动的 XZ 平面
+        getPlaneIndex(0u, l, 0u, params->axisCount[0] - 1, l, params->axisCount[2] - 1, Slice_idx);
+        break;
+    case 4:         // 沿 Z 轴方向移动的 XY 平面
+        getPlaneIndex(0u, 0u, l, params->axisCount[0] - 1, params->axisCount[1] - 1, l, Slice_idx);
+        break;
+    default:
+        break;
     }
 
-    void znnwidget::gshData(std::vector<VertexData>& data)
-    {
-        for (auto& v : data) {
-            v.position[0] = intoout(v.position[0],0);
-            v.position[1] = intoout(v.position[1],1);
-            v.position[2] = intoout(v.position[2],2);
-        }
+    Slice_VAO.bind();
+    Slice_EBO.bind();
+    Slice_EBO.allocate(Slice_idx.constData(), sizeof(unsigned) * (unsigned)(Slice_idx.size()));
+    Slice_VAO.release();
+    doneCurrent();
+    update();
+}
+
+void znnwidget::gshData(std::vector<VertexData>& data)
+{
+    for(int i = 0; i < 10;i ++){
+        qDebug() << params -> axisMin[0];
+        qDebug() << params -> getDiff(0);
+        qDebug() <<intoout(params -> axisMin[0] + params -> getDiff(0) * 0.1f * i,0);
+        tick.push_back(VertexData({intoout(params -> axisMin[0] + params -> getDiff(0) * 0.1f * i,0),intoout(params -> axisMin[1],1),intoout(params -> axisMin[2] ,2)}));
+        tick.push_back(VertexData({intoout(params -> axisMin[0],0),intoout(params -> axisMin[1] + params -> getDiff(1) * 0.1f * i,1),intoout(params -> axisMin[2] ,2)}));
+        tick.push_back(VertexData({intoout(params -> axisMin[0],0),intoout(params -> axisMin[1],1),intoout(params -> axisMin[2] + params -> getDiff(2) * 0.1f * i,2) }));
+    }
+    for (auto& v : data) {
+        v.position[0] = intoout(v.position[0],0);
+        v.position[1] = intoout(v.position[1],1);
+        v.position[2] = intoout(v.position[2],2);
+    }
+}
+
+void znnwidget::gshzb()
+{
+    float range[3];      // 保存每一对的范围
+    //    float scale[3];      // 保存归一化后的比例
+    // 计算每一对的差值
+    for (int i = 0; i < 3; ++i) {
+        range[i] = params->getDiff(i);
+    }
+    // 找出最大范围值
+    float max_range = std::max({range[0], range[1], range[2]});
+    // 按比例归一化，最大者为 1，其他按比例缩放
+    for (int i=  0; i < 3; i++) {
+        Axis_[i] = range[i] / max_range;
+    }
+}
+
+std::vector<VertexData> znnwidget::getEdgeVertices(const std::vector<VertexData> &data, int Nx, int Ny, int Nz)
+{
+    std::vector<VertexData> result;
+
+    // x方向边（4条），跳过 x = 0 和 x = Nx-1
+    for (int x = 1; x < Nx - 1; ++x) {
+        result.push_back(data[x * Ny * Nz + 0 * Nz + 0]);                  // (x, 0, 0)
+        result.push_back(data[x * Ny * Nz + (Ny - 1) * Nz + 0]);          // (x, Ny-1, 0)
+        result.push_back(data[x * Ny * Nz + 0 * Nz + (Nz - 1)]);          // (x, 0, Nz-1)
+        result.push_back(data[x * Ny * Nz + (Ny - 1) * Nz + (Nz - 1)]);   // (x, Ny-1, Nz-1)
     }
 
-    void znnwidget::gshzb()
-    {
-        float range[3];      // 保存每一对的范围
-        //    float scale[3];      // 保存归一化后的比例
-        // 计算每一对的差值
-        for (int i = 0; i < 3; ++i) {
-            range[i] = params->getDiff(i);
-        }
-        // 找出最大范围值
-        float max_range = std::max({range[0], range[1], range[2]});
-        // 按比例归一化，最大者为 1，其他按比例缩放
-        for (int i=  0; i < 3; i++) {
-            Axis_[i] = range[i] / max_range;
-        }
+    // y方向边（4条），跳过 y = 0 和 y = Ny-1
+    for (int y = 1; y < Ny - 1; ++y) {
+        result.push_back(data[0 * Ny * Nz + y * Nz + 0]);                 // (0, y, 0)
+        result.push_back(data[(Nx - 1) * Ny * Nz + y * Nz + 0]);          // (Nx-1, y, 0)
+        result.push_back(data[0 * Ny * Nz + y * Nz + (Nz - 1)]);          // (0, y, Nz-1)
+        result.push_back(data[(Nx - 1) * Ny * Nz + y * Nz + (Nz - 1)]);   // (Nx-1, y, Nz-1)
     }
 
-    std::vector<VertexData> znnwidget::getEdgeVertices(const std::vector<VertexData> &data, int Nx, int Ny, int Nz)
-    {
-        std::vector<VertexData> result;
-
-        // x方向边（4条），跳过 x = 0 和 x = Nx-1
-        for (int x = 1; x < Nx - 1; ++x) {
-            result.push_back(data[x * Ny * Nz + 0 * Nz + 0]);                  // (x, 0, 0)
-            result.push_back(data[x * Ny * Nz + (Ny - 1) * Nz + 0]);          // (x, Ny-1, 0)
-            result.push_back(data[x * Ny * Nz + 0 * Nz + (Nz - 1)]);          // (x, 0, Nz-1)
-            result.push_back(data[x * Ny * Nz + (Ny - 1) * Nz + (Nz - 1)]);   // (x, Ny-1, Nz-1)
-        }
-
-        // y方向边（4条），跳过 y = 0 和 y = Ny-1
-        for (int y = 1; y < Ny - 1; ++y) {
-            result.push_back(data[0 * Ny * Nz + y * Nz + 0]);                 // (0, y, 0)
-            result.push_back(data[(Nx - 1) * Ny * Nz + y * Nz + 0]);          // (Nx-1, y, 0)
-            result.push_back(data[0 * Ny * Nz + y * Nz + (Nz - 1)]);          // (0, y, Nz-1)
-            result.push_back(data[(Nx - 1) * Ny * Nz + y * Nz + (Nz - 1)]);   // (Nx-1, y, Nz-1)
-        }
-
-        // z方向边（4条），跳过 z = 0 和 z = Nz-1
-        for (int z = 1; z < Nz - 1; ++z) {
-            result.push_back(data[0 * Ny * Nz + 0 * Nz + z]);                 // (0, 0, z)
-            result.push_back(data[0 * Ny * Nz + (Ny - 1) * Nz + z]);          // (0, Ny-1, z)
-            result.push_back(data[(Nx - 1) * Ny * Nz + 0 * Nz + z]);          // (Nx-1, 0, z)
-            result.push_back(data[(Nx - 1) * Ny * Nz + (Ny - 1) * Nz + z]);   // (Nx-1, Ny-1, z)
-        }
-
-        return result;
+    // z方向边（4条），跳过 z = 0 和 z = Nz-1
+    for (int z = 1; z < Nz - 1; ++z) {
+        result.push_back(data[0 * Ny * Nz + 0 * Nz + z]);                 // (0, 0, z)
+        result.push_back(data[0 * Ny * Nz + (Ny - 1) * Nz + z]);          // (0, Ny-1, z)
+        result.push_back(data[(Nx - 1) * Ny * Nz + 0 * Nz + z]);          // (Nx-1, 0, z)
+        result.push_back(data[(Nx - 1) * Ny * Nz + (Ny - 1) * Nz + z]);   // (Nx-1, Ny-1, z)
     }
 
+    return result;
+}
 
-    void znnwidget::on_timeout()
-    {
-        makeCurrent();
-        if(is_xc) angleZ += 2.0f;
-        if (angleX >= 360.0f) angleZ -= 360.0f;
-        doneCurrent();
-        update();
+
+void znnwidget::on_timeout()
+{
+    makeCurrent();
+    if(is_xc) angleZ += 2.0f;
+    if (angleX >= 360.0f) angleZ -= 360.0f;
+    doneCurrent();
+    update();
+}
+void znnwidget::keyPressEvent(QKeyEvent *event)
+{
+    switch (event->key()) {
+    case Qt::Key_W:
+        offsetY += 0.05f;
+        break;
+    case Qt::Key_S:
+        offsetY -= 0.05f;
+        break;
+    case Qt::Key_A:
+        offsetX -= 0.05f;
+        break;
+    case Qt::Key_D:
+        offsetX += 0.05f;
+        break;
+    default:
+        break;
     }
-    void znnwidget::keyPressEvent(QKeyEvent *event)
-    {
-        switch (event->key()) {
-        case Qt::Key_W:
-            offsetY += 0.05f;
-            break;
-        case Qt::Key_S:
-            offsetY -= 0.05f;
-            break;
-        case Qt::Key_A:
-            offsetX -= 0.05f;
-            break;
-        case Qt::Key_D:
-            offsetX += 0.05f;
-            break;
-        default:
-            break;
-        }
-        update(); // 重新绘制
-    }
+    update(); // 重新绘制
+}
 
-    void znnwidget::resetData()
-    {
-        axisData.clear();
-        modelData.clear();
-        modelData.reserve(params->getScale());
-    }
+void znnwidget::resetData()
+{
+    axisData.clear();
+    modelData.clear();
+    modelData.reserve(params->getScale());
+}
 
-    void znnwidget::getData(int pos, float v)
-    {
-        modelData.push_back(VertexData(params->getRealPos(pos), stColor(v, params->min_v, params->max_v)));
-    }
+void znnwidget::getData(int pos, float v)
+{
+    modelData.push_back(VertexData(params->getRealPos(pos), stColor(v, params->min_v, params->max_v)));
+}
 
-    void znnwidget::processData()
-    {
-        makeCurrent();
-        // 处理坐标轴
-        gshzb();
-        // 前面
-        axisData.push_back(VertexData({ -Axis_[0], -Axis_[1],  Axis_[2] })); // 0
-        axisData.push_back(VertexData({  Axis_[0], -Axis_[1],  Axis_[2] })); // 1
-        axisData.push_back(VertexData({  Axis_[0],  Axis_[1],  Axis_[2] })); // 2
-        axisData.push_back(VertexData({ -Axis_[0],  Axis_[1],  Axis_[2] })); // 3
-        // 后面
-        axisData.push_back(VertexData({ -Axis_[0], -Axis_[1], -Axis_[2] })); // 4
-        axisData.push_back(VertexData({  Axis_[0], -Axis_[1], -Axis_[2] })); // 5
-        axisData.push_back(VertexData({  Axis_[0],  Axis_[1], -Axis_[2] })); // 6
-        axisData.push_back(VertexData({ -Axis_[0],  Axis_[1], -Axis_[2] })); // 7
-        Axis_VBO.bind();
-        Axis_VBO.allocate(axisData.data(), sizeof(VertexData) * (unsigned)(axisData.size()));
-        Axis_VBO.release();
-        unsigned xCount = (unsigned) params->axisCount[0];
-        unsigned yCount = (unsigned) params->axisCount[1];
-        unsigned zCount = (unsigned) params->axisCount[2];
-        corners.push_back(0);              corners.push_back(0);              corners.push_back(0);
-        corners.push_back(xCount - 1);     corners.push_back(0);              corners.push_back(0);
-        corners.push_back(0);              corners.push_back(yCount - 1);     corners.push_back(0);
-        corners.push_back(xCount - 1);     corners.push_back(yCount - 1);     corners.push_back(0);
-        corners.push_back(0);              corners.push_back(0);              corners.push_back(zCount - 1);
-        corners.push_back(xCount - 1);     corners.push_back(0);              corners.push_back(zCount - 1);
-        corners.push_back(0);              corners.push_back(yCount - 1);     corners.push_back(zCount - 1);
-        corners.push_back(xCount - 1);     corners.push_back(yCount - 1);     corners.push_back(zCount - 1);
-        gshData(modelData);
+void znnwidget::processData()
+{
+    makeCurrent();
+    // 处理坐标轴
+    gshzb();
+    // 前面
+    axisData.push_back(VertexData({ -Axis_[0], -Axis_[1],  Axis_[2] })); // 0
+    axisData.push_back(VertexData({  Axis_[0], -Axis_[1],  Axis_[2] })); // 1
+    axisData.push_back(VertexData({  Axis_[0],  Axis_[1],  Axis_[2] })); // 2
+    axisData.push_back(VertexData({ -Axis_[0],  Axis_[1],  Axis_[2] })); // 3
+    // 后面
+    axisData.push_back(VertexData({ -Axis_[0], -Axis_[1], -Axis_[2] })); // 4
+    axisData.push_back(VertexData({  Axis_[0], -Axis_[1], -Axis_[2] })); // 5
+    axisData.push_back(VertexData({  Axis_[0],  Axis_[1], -Axis_[2] })); // 6
+    axisData.push_back(VertexData({ -Axis_[0],  Axis_[1], -Axis_[2] })); // 7
+    Axis_VBO.bind();
+    Axis_VBO.allocate(axisData.data(), sizeof(VertexData) * (unsigned)(axisData.size()));
+    Axis_VBO.release();
+    unsigned xCount = (unsigned) params->axisCount[0];
+    unsigned yCount = (unsigned) params->axisCount[1];
+    unsigned zCount = (unsigned) params->axisCount[2];
+    corners.push_back(0);              corners.push_back(0);              corners.push_back(0);
+    corners.push_back(xCount - 1);     corners.push_back(0);              corners.push_back(0);
+    corners.push_back(0);              corners.push_back(yCount - 1);     corners.push_back(0);
+    corners.push_back(xCount - 1);     corners.push_back(yCount - 1);     corners.push_back(0);
+    corners.push_back(0);              corners.push_back(0);              corners.push_back(zCount - 1);
+    corners.push_back(xCount - 1);     corners.push_back(0);              corners.push_back(zCount - 1);
+    corners.push_back(0);              corners.push_back(yCount - 1);     corners.push_back(zCount - 1);
+    corners.push_back(xCount - 1);     corners.push_back(yCount - 1);     corners.push_back(zCount - 1);
+    gshData(modelData);
+    qDebug() << modelData.size() << '\n';
 
-        qDebug() << modelData.size() << '\n';
+    Data_VBO.bind();
+    Data_VBO.allocate(modelData.data(), sizeof(VertexData) * (unsigned)(modelData.size()));
+    Data_VBO.release();
 
-        Data_VBO.bind();
-        Data_VBO.allocate(modelData.data(), sizeof(VertexData) * (unsigned)(modelData.size()));
-        Data_VBO.release();
+    doneCurrent();
+    update();
+}
+QColor znnwidget::stColor(float a, float mn, float mx) {
+    // 根据速度的最大值和最小值将该节点的速度值归一化到[0.0, 1.0]
+    double t = (mx - a) / (mx - mn);
+    if (t < 0.0) t = 0.0;
+    if (t > 1.0) t = 1.0;
+    // 使用 HSL 颜色进行过度
+    // 计算色相(240.0为蓝 360.0为红)
+    double hue = 240.0 + 120.0 * t;
 
-        doneCurrent();
-        update();
-    }
-    QColor znnwidget::stColor(float a, float mn, float mx) {
-        // 根据速度的最大值和最小值将该节点的速度值归一化到[0.0, 1.0]
-        double t = (mx - a) / (mx - mn);
-        if (t < 0.0) t = 0.0;
-        if (t > 1.0) t = 1.0;
-        // 使用 HSL 颜色进行过度
-        // 计算色相(240.0为蓝 360.0为红)
-        double hue = 240.0 + 120.0 * t;
+    QColor tmp = QColor::fromHslF(hue / 360.0, 1.0, 0.5);
 
-        QColor tmp = QColor::fromHslF(hue / 360.0, 1.0, 0.5);
-
-        return tmp;
-    }
-    znnwidget::~znnwidget()
-    {
-        if(!isValid()) return;
-        makeCurrent();
-        Axis_VAO.destroy();
-        Axis_VBO.destroy();
-        Axis_EBO.destroy();
-
-        Data_VBO.destroy();
-        Surface_VAO.destroy();
-        Surface_EBO.destroy();
-        Slice_VAO.destroy();
-        Slice_EBO.destroy();
-        doneCurrent();
-    }
+    return tmp;
+}
+znnwidget::~znnwidget()
+{
+    if(!isValid()) return;
+    makeCurrent();
+    Axis_VAO.destroy();
+    Axis_VBO.destroy();
+    Axis_EBO.destroy();
+    Data_VBO.destroy();
+    Surface_VAO.destroy();
+    Surface_EBO.destroy();
+    Slice_VAO.destroy();
+    Slice_EBO.destroy();
+    doneCurrent();
+}
