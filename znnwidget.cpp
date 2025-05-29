@@ -222,7 +222,7 @@ void znnwidget::paintGL()
     QLinearGradient gradient(x, y, x + w, y);
     QFont font = painter.font();
     if(is_draw == true){
-        // 绘制颜色渐变
+        // 色卡
         for (int i = 0; i <= 100; ++i) {
             double ratio = i / 100.0; // 0.00 ~ 1.0
             gradient.setColorAt(ratio, stColor(ratio * (params->max_v - params->min_v) + params->min_v, params->min_v, params->max_v));
@@ -234,7 +234,7 @@ void znnwidget::paintGL()
         font.setBold(true);
         painter.setFont(font);
         painter.setPen(Qt::white);
-        for (int i = 0; i < 10; ++i) {
+        for (int i = 0; i <= 10; ++i) {
             double ratio = i / 10.0;
             int tick_x = x + static_cast<int>(ratio * w);
             float value = params->min_v + ratio * (params->max_v - params->min_v);
@@ -248,28 +248,31 @@ void znnwidget::paintGL()
     font.setBold(true);
     painter.setFont(font);
     painter.setPen(Qt::white);
+    // 切片角点坐标
     unsigned xCount = params->axisCount[0];
     unsigned yCount = params->axisCount[1];
     unsigned zCount = params->axisCount[2];
-    for(unsigned i = 0; i * 3 < (unsigned)slice_situation.size();i ++){
-        unsigned x = slice_situation[0 + 3 * i];
-        unsigned y = slice_situation[1 + 3 * i];
-        unsigned z = slice_situation[2 + 3 * i];
-        if (x < xCount && y < yCount && z < zCount) {
-            unsigned index1 = x * (yCount * zCount) + y * zCount + z;
-            if (index1 < modelData.size()) {
-                QString text = QString("(%1, %2, %3)")
-                        .arg(outtoin(modelData[index1].position.x(), 0), 0, 'f', 2)
-                        .arg(outtoin(modelData[index1].position.y(), 1), 0, 'f', 2)
-                        .arg(outtoin(modelData[index1].position.z(), 2), 0, 'f', 2);
+    if(show_slice_location){
+        for(unsigned i = 0; i * 3 < (unsigned)slice_situation.size();i ++){
+            unsigned x = slice_situation[0 + 3 * i];
+            unsigned y = slice_situation[1 + 3 * i];
+            unsigned z = slice_situation[2 + 3 * i];
+            if (x < xCount && y < yCount && z < zCount) {
+                unsigned index1 = x * (yCount * zCount) + y * zCount + z;
+                if (index1 < modelData.size()) {
+                    QString text = QString("(%1, %2, %3)")
+                            .arg(outtoin(modelData[index1].position.x(), 0), 0, 'f', 2)
+                            .arg(outtoin(modelData[index1].position.y(), 1), 0, 'f', 2)
+                            .arg(outtoin(modelData[index1].position.z(), 2), 0, 'f', 2);
 
-                QPoint screenPos = projectToScreen(modelData[index1].position, model, view, projection);
-                if (screenPos != QPoint(-1000, -1000)) {
-                    painter.drawText(screenPos, text);
+                    QPoint screenPos = projectToScreen(modelData[index1].position, model, view, projection);
+                    if (screenPos != QPoint(-1000, -1000)) {
+                        painter.drawText(screenPos, text);
+                    }
                 }
             }
-        }
 
+        }
     }
     // 打印顶点坐标
     if(is_show_location){
@@ -298,20 +301,21 @@ void znnwidget::paintGL()
         }
     }
     //画刻度
-    int count = 0;
-    for(auto &v:tick){
-        QString text;
-        if(count % 3 == 0) text = QString("-%1").arg(outtoin(v.position.x(), 0), 0, 'f', 2);
-        else if(count % 3 == 1) text = QString("-%1").arg(outtoin(v.position.y(), 1), 0, 'f', 2);
-        else text = QString("-%1").arg(outtoin(v.position.z(), 2), 0, 'f', 2);
-        QPoint screenPos = projectToScreen(v.position, model, view, projection);
-        if (screenPos != QPoint(-1000, -1000)) {
-            //painter.setPen(Qt::red);
-            painter.drawText(screenPos, text);
+    if(show_tick){
+        int count = 0;
+        for(auto &v:tick){
+            QString text;
+            if(count % 3 == 0) text = QString("-%1").arg(outtoin(v.position.x(), 0), 0, 'f', 2);
+            else if(count % 3 == 1) text = QString("-%1").arg(outtoin(v.position.y(), 1), 0, 'f', 2);
+            else text = QString("-%1").arg(outtoin(v.position.z(), 2), 0, 'f', 2);
+            QPoint screenPos = projectToScreen(v.position, model, view, projection);
+            if (screenPos != QPoint(-1000, -1000)) {
+                //painter.setPen(Qt::red);
+                painter.drawText(screenPos, text);
+            }
+            count ++;
         }
-        count ++;
     }
-
     painter.end();
 }
 
@@ -407,7 +411,7 @@ void znnwidget::getSliceIndex(int type, unsigned l)
 
 void znnwidget::gshData(std::vector<VertexData>& data)
 {
-    for(int i = 0; i < 10;i ++){
+    for(int i = 0; i <= 10;i ++){
         qDebug() << params -> axisMin[0];
         qDebug() << params -> getDiff(0);
         qDebug() <<intoout(params -> axisMin[0] + params -> getDiff(0) * 0.1f * i,0);

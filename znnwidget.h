@@ -49,6 +49,8 @@ public:
     void keyPressEvent(QKeyEvent *event);
     bool is_xc = false;
     bool is_draw = false;
+    bool show_tick = false;
+    bool show_slice_location = false;
     std::vector<VertexData> axisData;  // 坐标系再屏幕上的位置
     std::vector<VertexData> modelData; // 每个点的数据
     void resetData();                  // 重置所有数据，并预存空间

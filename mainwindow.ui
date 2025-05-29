@@ -491,6 +491,8 @@
    <addaction name="actxc"/>
    <addaction name="colorshow"/>
    <addaction name="action_show_location"/>
+   <addaction name="action_show_tick"/>
+   <addaction name="action_show_slice_location"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <action name="openFile">
@@ -550,6 +552,22 @@
    </property>
    <property name="text">
     <string>显示顶点坐标</string>
+   </property>
+  </action>
+  <action name="action_show_tick">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>显示刻度</string>
+   </property>
+  </action>
+  <action name="action_show_slice_location">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>显示切片角点坐标</string>
    </property>
   </action>
  </widget>

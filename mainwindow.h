@@ -17,7 +17,6 @@ public:
     ~MainWindow();
 
 private slots:
-    void datatest();
     void on_actxc_triggered();
 
     void on_horizontalSlider_valueChanged(int value); //缩放滑杆
@@ -65,6 +64,10 @@ private slots:
     void on_spinBox_min_points_editingFinished();
 
     void on_action_show_location_triggered();
+
+    void on_action_show_tick_triggered();
+
+    void on_action_show_slice_location_triggered();
 
 private:
     Ui::MainWindow *ui;

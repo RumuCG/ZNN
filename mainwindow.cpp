@@ -30,18 +30,18 @@ void MainWindow::on_openFile_triggered()
 {
     // 获取应用目录下的1DIPL文件夹路径
     QString dataDir = QDir(QCoreApplication::applicationDirPath())
-                     .filePath("1DIPL");
+            .filePath("1DIPL");
 
     // 如果不存在就创建
     QDir().mkpath(dataDir);
 
     // 打开文件对话框
     QString filePath = QFileDialog::getOpenFileName(
-        this,
-        "选择源文件",
-        dataDir,  // 初始目录
-        "文本文件 (*.txt)" // 过滤器
-    );
+                this,
+                "选择源文件",
+                dataDir,  // 初始目录
+                "文本文件 (*.txt)" // 过滤器
+                );
 
     if (!filePath.isEmpty()) {
         params->inputFileName = QFileInfo(filePath).fileName();
@@ -103,7 +103,7 @@ bool MainWindow::readFile(const QString &FileName)
     }
     QTextStream in(&dataFile);
     QStringList lines = in.readAll()                                // 读取所有行
-                          .split('\n', QString::SkipEmptyParts);    // 只将非空行存到lines里面
+            .split('\n', QString::SkipEmptyParts);    // 只将非空行存到lines里面
 
 
     ui->openGLWidget->resetData();
@@ -179,7 +179,7 @@ void MainWindow::on_DisplayMode_currentIndexChanged(int index)
 {
     bool enable = (index > 1);
     ui->PostionSlider->setEnabled(enable);
-//    ui->PositionBox->setEnabled(enable);
+    //    ui->PositionBox->setEnabled(enable);
 
     if (index == 0) {   // NULL 啥都不干
         ui->PostionSlider->setValue(0);
@@ -322,5 +322,17 @@ void MainWindow::on_spinBox_min_points_editingFinished()
 void MainWindow::on_action_show_location_triggered()
 {
     ui->openGLWidget->is_show_location = ui->action_show_location ->isChecked();
+    update();
+}
+
+void MainWindow::on_action_show_tick_triggered()
+{
+    ui->openGLWidget->show_tick = ui->action_show_tick ->isChecked();
+    update();
+}
+
+void MainWindow::on_action_show_slice_location_triggered()
+{
+    ui->openGLWidget->show_slice_location = ui->action_show_slice_location ->isChecked();
     update();
 }
