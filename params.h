@@ -22,6 +22,7 @@ public:
     float axisStep[3];
     int axisCount[3];
 
+    bool inRange(int i, float val);   // 判断 val 是否再第 i 根轴上
     float getDiff(int i);           // 返回第 i 根轴上最值之差
     int getScale();                 // 返回数据规模 x * y * z
     QVector3D getRealPos(int pos);  // 根据pos的值计算在网格中的坐标，根据在网格中的坐标计算实际坐标

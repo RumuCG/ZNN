@@ -44,7 +44,8 @@ void MainWindow::on_openFile_triggered()
                 );
 
     if (!filePath.isEmpty()) {
-        params->inputFileName = QFileInfo(filePath).fileName();
+//        params->inputFileName = QFileInfo(filePath).fileName();
+        params->inputFileName = filePath;
         ui->statusBar->showMessage("当前文件：" + filePath);
     }
 }
@@ -53,42 +54,47 @@ void MainWindow::MainWindow::on_drawModel_triggered()
 {
     if (not params->writeConfig()) {
         qDebug() << "fail to write config.ini";
+        return;
     }
-    else {
-        qDebug() << "write config.ini successfully";
-        ui->horizontalSlider->setValue(50);
-        ui->horizontalSlider_2->setValue(90);
-        ui->horizontalSlider_3->setValue(0);
-        ui->horizontalSlider_4->setValue(300);
-        // 尝试启动差值程序
-        QString programPath = QCoreApplication::applicationDirPath() + "/1DIPL/1DIPL.exe";
-        if (!QFileInfo::exists(programPath)) {
-            qWarning() << "1DIPL.exe 不存在：" << programPath;
-            return;
-        }
+    qDebug() << "write config.ini successfully";
 
-        QProcess process;
-        process.setProgram(programPath);
-        process.setWorkingDirectory(QCoreApplication::applicationDirPath() + "/1DIPL");
-        process.start();
+    //  设置显示模型的初始角度
+    ui->horizontalSlider->setValue(50);
+    ui->horizontalSlider_2->setValue(90);
+    ui->horizontalSlider_3->setValue(0);
+    ui->horizontalSlider_4->setValue(300);
 
-        if (!process.waitForStarted(3000)) {
-            qWarning() << "程序启动失败：" << process.errorString();
-            return;
-        }
-        if (!process.waitForFinished(-1)) {
-            qWarning() << "程序执行异常：" << process.errorString();
-            return;
-        }
-
-        int exitCode = process.exitCode();
-        qDebug() << "执行完成，退出码：" << exitCode;
-
-        if (exitCode == 0) {    // 正常退出才开始读取文件
-            qDebug() << "正常退出";
-            fileRead = readFile(QCoreApplication::applicationDirPath() + "/1DIPL/" + params->outputFileName);
-        }
+    // 尝试启动差值程序
+    QString programPath = QCoreApplication::applicationDirPath() + "/1DIPL/1DIPL.exe";
+    if (!QFileInfo::exists(programPath)) {
+        qWarning() << "1DIPL.exe 不存在：" << programPath;
+        return;
     }
+
+    QProcess process;
+    process.setProgram(programPath);
+    process.setWorkingDirectory(QCoreApplication::applicationDirPath() + "/1DIPL");
+    process.start();
+
+    if (!process.waitForStarted(3000)) {
+        qWarning() << "程序启动失败：" << process.errorString();
+        return;
+    }
+    if (!process.waitForFinished(-1)) {
+        qWarning() << "程序执行异常：" << process.errorString();
+        return;
+    }
+
+    int exitCode = process.exitCode();
+    qDebug() << "执行完成，退出码：" << exitCode;
+
+    if (exitCode != 0) {    // 正常退出才开始读取文件
+        qDebug() << "差值程序执行错误";
+        return;
+    }
+
+    qDebug() << "正常退出";
+    fileRead = readFile(QCoreApplication::applicationDirPath() + "/1DIPL/" + params->outputFileName);
 }
 
 bool MainWindow::readFile(const QString &FileName)
@@ -126,13 +132,44 @@ bool MainWindow::readFile(const QString &FileName)
             }
         }
     }
+    qDebug() << "VPR file read ok !\n" << ui->openGLWidget->modelData.size() << " datas Read\n";
+    dataFile.close();
 
-    qDebug() << "File read ok !\n" << ui->openGLWidget->modelData.size() << " datas Read\n";
+    QFile wellFile(params->inputFileName);
+    qDebug() << "ready to read " << params->inputFileName << '\n';
+    if (not wellFile.open(QIODevice::ReadOnly | QIODevice::Text)) { // QIODevice::Text 处理换行符号
+        qDebug() << "Fail to read File " << params->inputFileName << '\n';
+        return false;
+    }
+    QTextStream wellIn(&wellFile);
+    QStringList wellLines = wellIn.readAll()                                // 读取所有行
+            .split('\n', QString::SkipEmptyParts);    // 只将非空行存到wellLines里面
+
+    headLine = true;
+    for (const QString &line : wellLines) {
+        QStringList valueList = line.split('\t', QString::SkipEmptyParts);
+        if (valueList.empty()) {
+            continue;
+        }
+
+        float z = valueList[3].toFloat(), val = valueList[0].toFloat();
+        if (params->inRange(2, z)) {
+            ui->openGLWidget->well.push_back({ z, val });
+        }
+
+        if (headLine) {
+            ui->openGLWidget->well_x = valueList[1].toFloat();
+            ui->openGLWidget->well_y = valueList[2].toFloat();
+            headLine = false;
+        }
+    }
+    qDebug() << "Well file read ok !\n" << ui->openGLWidget->well.size() << " datas Read\n";
+    qDebug() << ui->openGLWidget->well_x << ' ' << ui->openGLWidget->well_y;
+    qDebug() << ui->openGLWidget->well.back().first << '\n';
+    wellFile.close();
 
     ui->openGLWidget->processData();
-
-    dataFile.close();
-    return true;
+    return true;;
 }
 
 void MainWindow::on_actxc_triggered()

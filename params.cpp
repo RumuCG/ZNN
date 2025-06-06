@@ -24,6 +24,14 @@ Params::Params(QObject *parent) :
     minPoint = 0.0f;
 }
 
+bool Params::inRange(int i, float val)
+{
+    if (i < 0 || 3 <= i) {
+        return false;
+    }
+    return axisMin[i] <= val && val <= axisMin[i] + (axisCount[i] - 1) * axisStep[i];
+}
+
 float Params::getDiff(int i)
 {
     return (axisCount[i] - 1) * axisStep[i];

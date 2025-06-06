@@ -544,6 +544,7 @@ void znnwidget::resetData()
     axisData.clear();
     modelData.clear();
     modelData.reserve(params->getScale());
+    well.clear();
 }
 
 void znnwidget::getData(int pos, float v)
