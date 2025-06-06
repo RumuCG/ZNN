@@ -318,6 +318,7 @@ void znnwidget::paintGL()
         }
     }
     // < -------------------------- 画井 ------------------------------------->
+    //well_mode = 2;
     if(well_mode == 1){// x 切片切到了井
         bool flag = false;
         QPoint previous;
@@ -335,6 +336,7 @@ void znnwidget::paintGL()
         bool flag = false;
         QPoint previous;
         for(auto &dot:well){
+
             float tmp_x = reflectval(dot.second,params->min_v,params->max_v,params->axisMin[0],params->axisMin[0] + params->getDiff(0));
             QPoint screenPos = projectToScreen({intoout(tmp_x,0),intoout(well_y,1),intoout(dot.first,2)}, model, view, projection);
             if(flag){
@@ -358,12 +360,12 @@ void znnwidget::getPlaneIndex(unsigned st_x, unsigned st_y, unsigned st_z, unsig
     unsigned d_fst = 0, d_sec = 0;
     if (st_x == en_x) {
         en_x++;
-        if(fabsf(tmp.position[0] - well_x) < (float)1e-6) well_mode = 1;
+        if(fabsf(tmp.position[0] - intoout(well_x,0)) < (float)2.0 / params->axisCount[0] ) well_mode = 1;
         d_fst = params->axisCount[2], d_sec = 1u;
     }
     else if (st_y == en_y) {
         en_y++;
-        if(fabsf(tmp.position[1] - well_y) < (float)1e-6) well_mode = 2;
+        if(fabsf(tmp.position[1] - intoout(well_y,1)) < (float)2.0 / params->axisCount[1]) well_mode = 2;
         d_fst = params->axisCount[1] * params->axisCount[2], d_sec = 1u;
     }
     else if (st_z == en_z) {
@@ -475,8 +477,15 @@ void znnwidget::gshzb()
 
 float znnwidget::reflectval(float v, float min_v, float max_v, float a, float b)
 {
-    return a + (v - min_v) * (b - a) / (max_v - min_v);
+        float ratio = 20 / 100.0f;
+        if (ratio <= 0.0f) return a;
+        if (ratio >= 1.0f) return a + (v - min_v) * (b - a) / (max_v - min_v);
+        float margin_ratio = (1.0f - ratio) / 2.0f;
+        float new_a = a + margin_ratio * (b - a);
+        float new_b = b - margin_ratio * (b - a);
+        return new_a + (v - min_v) * (new_b - new_a) / (max_v - min_v);
 }
+
 
 std::vector<VertexData> znnwidget::getEdgeVertices(const std::vector<VertexData> &data, int Nx, int Ny, int Nz)
 {

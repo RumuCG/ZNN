@@ -12,6 +12,57 @@ MainWindow::MainWindow(QWidget *parent) :
     this->setStyleSheet("background-color: rgb(21, 160, 221);");  // 浅紫色（plum）
     ui->setupUi(this);
     ui->openGLWidget->initParams(params);
+    ui->statusBar->showMessage("当前未读取文件");
+    params->axisMin[0] = static_cast<float>(ui->doubleSpinBox_X_Min->value());
+    params->axisStep[0] = static_cast<float>(ui->doubleSpinBox_X_Step->value());
+    params->axisCount[0] = ui->spinBox_X_Count->value();
+    params->axisMin[1] = static_cast<float>(ui->doubleSpinBox_Y_Min->value());
+    params->axisStep[1] = static_cast<float>(ui->doubleSpinBox_Y_Step->value());
+    params->axisCount[1] = ui->spinBox_Y_Count->value();
+    params->axisMin[2] = static_cast<float>(ui->doubleSpinBox_Z_Min->value());
+    params->axisStep[2] = static_cast<float>(ui->doubleSpinBox_Z_Step->value());
+    params->axisCount[2] = ui->spinBox_Z_Count->value();
+    params->interpPower = static_cast<float>(ui->doubleSpinBox_interp_power->value());
+    params->radius = static_cast<float>(ui->doubleSpinBox_radius->value());
+    params->minPoint = ui->spinBox_min_points->value();
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+void MainWindow::on_openFile_triggered()
+{
+    // 获取应用目录下的1DIPL文件夹路径
+    QString dataDir = QDir(QCoreApplication::applicationDirPath())
+            .filePath("1DIPL");
+
+    // 如果不存在就创建
+    QDir().mkpath(dataDir);
+
+    // 打开文件对话框
+    QString filePath = QFileDialog::getOpenFileName(
+                this,
+                "选择源文件",
+                dataDir,  // 初始目录
+                "文本文件 (*.txt)" // 过滤器
+                );
+
+    if (!filePath.isEmpty()) {
+        //        params->inputFileName = QFileInfo(filePath).fileName();
+        params->inputFileName = filePath;
+        ui->statusBar->showMessage("当前文件：" + filePath);
+    }
+}
+
+void MainWindow::MainWindow::on_drawModel_triggered()
+{
+    if (not params->writeConfig()) {
+        qDebug() << "fail to write config.ini";
+        return;
+    }
+    qDebug() << "write config.ini successfully";
 
     //  设置显示模型的初始角度
     ui->horizontalSlider->setValue(50);
