@@ -15,6 +15,7 @@
 #include <bits/stdc++.h>
 #include <QPainter>
 #include "params.h"
+#include<QMessageBox>
 struct VertexData {
     QVector3D position;
     QVector3D color;

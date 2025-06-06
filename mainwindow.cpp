@@ -19,6 +19,18 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "out setupui";
     ui->openGLWidget->initParams(params);
     ui->statusBar->showMessage("当前未读取文件");
+    params->axisMin[0] = static_cast<float>(ui->doubleSpinBox_X_Min->value());
+    params->axisStep[0] = static_cast<float>(ui->doubleSpinBox_X_Step->value());
+    params->axisCount[0] = ui->spinBox_X_Count->value();
+    params->axisMin[1] = static_cast<float>(ui->doubleSpinBox_Y_Min->value());
+    params->axisStep[1] = static_cast<float>(ui->doubleSpinBox_Y_Step->value());
+    params->axisCount[1] = ui->spinBox_Y_Count->value();
+    params->axisMin[2] = static_cast<float>(ui->doubleSpinBox_Z_Min->value());
+    params->axisStep[2] = static_cast<float>(ui->doubleSpinBox_Z_Step->value());
+    params->axisCount[2] = ui->spinBox_Z_Count->value();
+    params->interpPower = static_cast<float>(ui->doubleSpinBox_interp_power->value());
+    params->radius = static_cast<float>(ui->doubleSpinBox_radius->value());
+    params->minPoint = ui->spinBox_min_points->value();
 }
 
 MainWindow::~MainWindow()
@@ -44,7 +56,7 @@ void MainWindow::on_openFile_triggered()
                 );
 
     if (!filePath.isEmpty()) {
-//        params->inputFileName = QFileInfo(filePath).fileName();
+        //        params->inputFileName = QFileInfo(filePath).fileName();
         params->inputFileName = filePath;
         ui->statusBar->showMessage("当前文件：" + filePath);
     }
