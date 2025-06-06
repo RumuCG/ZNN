@@ -38,7 +38,7 @@ public:
     bool writeConfig();              // 写数据到 config.ini
 
 private:
-    static constexpr int LimitScale = 10000000; // 1e7
+    static constexpr long long LimitScale = 1e10; // 1e7
     bool chkData();                   // 检查参数的合法性
 };
 

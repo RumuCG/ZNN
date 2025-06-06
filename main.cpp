@@ -7,7 +7,7 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow w;
     w.setWindowTitle("3D Displayer");
-    w.setFixedSize(1600, 1200);
+   // w.setFixedSize(1600, 1200);
     QScreen *screen = QGuiApplication::primaryScreen();
     QRect screenGeometry = screen->geometry();
     int x = (screenGeometry.width() - w.width()) / 2;

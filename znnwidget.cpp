@@ -1,4 +1,4 @@
-#include "znnwidget.h"
+﻿#include "znnwidget.h"
 znnwidget::znnwidget(QWidget *parent) :
     QOpenGLWidget(parent),
     Axis_VBO(QOpenGLBuffer::VertexBuffer),      // 指定为vbo
@@ -216,11 +216,12 @@ void znnwidget::paintGL()
 
     QPainter painter(this);
     painter.setPen(Qt::red);
-    painter.setFont(QFont("Arial", 10));
+    painter.setFont(QFont("Arial", 5));
     int x = 20, y = 20, w = 500, h = 20;
     QRect rect(x, y, w, h);
     QLinearGradient gradient(x, y, x + w, y);
     QFont font = painter.font();
+    // < -------------------------- 绘制色卡------------------------------------->
     if(is_draw == true){
         // 色卡
         for (int i = 0; i <= 100; ++i) {
@@ -244,7 +245,7 @@ void znnwidget::paintGL()
             painter.drawLine(tick_x, y + h, tick_x, y + h + 5);
         }
     }
-
+    // < -------------------------- 绘制色卡 ------------------------------------->
     font.setBold(true);
     painter.setFont(font);
     painter.setPen(Qt::white);
@@ -316,6 +317,34 @@ void znnwidget::paintGL()
             count ++;
         }
     }
+    // < -------------------------- 画井 ------------------------------------->
+    if(well_mode == 1){// x 切片切到了井
+        bool flag = false;
+        QPoint previous;
+        for(auto &dot:well){
+            float tmp_y = reflectval(dot.second,params->min_v,params->max_v,params->axisMin[1],params->axisMin[1] + params->getDiff(1));
+            QPoint screenPos = projectToScreen({intoout(well_x,0),intoout(tmp_y,1),intoout(dot.first,2)}, model, view, projection);
+            if(flag){
+                painter.drawLine(previous,screenPos);
+            }
+            flag = true;
+            previous = screenPos;
+        }
+    }
+    if(well_mode == 2){// y 切片切到了井
+        bool flag = false;
+        QPoint previous;
+        for(auto &dot:well){
+            float tmp_x = reflectval(dot.second,params->min_v,params->max_v,params->axisMin[0],params->axisMin[0] + params->getDiff(0));
+            QPoint screenPos = projectToScreen({intoout(tmp_x,0),intoout(well_y,1),intoout(dot.first,2)}, model, view, projection);
+            if(flag){
+                painter.drawLine(previous,screenPos);
+            }
+            flag = true;
+            previous = screenPos;
+        }
+    }
+    // <-------------------------------------- 画井 ---------------------------------------------->
     painter.end();
 }
 
@@ -324,15 +353,17 @@ void znnwidget::getPlaneIndex(unsigned st_x, unsigned st_y, unsigned st_z, unsig
 {
     slice_situation.clear();
     slice_situation = {st_x, st_y, st_z, en_x, en_y, en_z};
-
-    // (x, y, z) -> ((params->axisCount[1] * params->axisCount[2]) * x + params->axisCount[2] * y + z)
+    well_mode = 0;
+    VertexData tmp  = modelData[((params->axisCount[1] * params->axisCount[2]) * st_x + params->axisCount[2] * st_y + st_z)];
     unsigned d_fst = 0, d_sec = 0;
     if (st_x == en_x) {
         en_x++;
+        if(fabsf(tmp.position[0] - well_x) < (float)1e-6) well_mode = 1;
         d_fst = params->axisCount[2], d_sec = 1u;
     }
     else if (st_y == en_y) {
         en_y++;
+        if(fabsf(tmp.position[1] - well_y) < (float)1e-6) well_mode = 2;
         d_fst = params->axisCount[1] * params->axisCount[2], d_sec = 1u;
     }
     else if (st_z == en_z) {
@@ -440,6 +471,11 @@ void znnwidget::gshzb()
     for (int i=  0; i < 3; i++) {
         Axis_[i] = range[i] / max_range;
     }
+}
+
+float znnwidget::reflectval(float v, float min_v, float max_v, float a, float b)
+{
+    return a + (v - min_v) * (b - a) / (max_v - min_v);
 }
 
 std::vector<VertexData> znnwidget::getEdgeVertices(const std::vector<VertexData> &data, int Nx, int Ny, int Nz)

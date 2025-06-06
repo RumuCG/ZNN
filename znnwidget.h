@@ -15,7 +15,6 @@
 #include <bits/stdc++.h>
 #include <QPainter>
 #include "params.h"
-
 struct VertexData {
     QVector3D position;
     QVector3D color;
@@ -56,7 +55,12 @@ public:
     void resetData();                  // 重置所有数据，并预存空间
     void getData(int pos, float v);
     void processData();                // 处理读入的数据
-
+    // < -------------------------- 井的数据------------------------------------->
+    std::vector<std::pair<float,float>> well;
+    float well_x,well_y; //  原始坐标
+    // <------------------前面两个需要读入----------------->
+    unsigned well_mode = 0;
+    // < -------------------------- 井的数据------------------------------------->
     QPoint projectToScreen(const QVector3D &worldPos, const QMatrix4x4 &model, const QMatrix4x4 &view, const QMatrix4x4 &proj);
     float intoout(float x,int p);
     float outtoin(float x,int p);
@@ -68,6 +72,7 @@ public:
     void getSliceIndex(int type, unsigned l);
     void gshData(std::vector<VertexData>&);
     void gshzb();
+    float reflectval(float v,float min_v,float max_v,float a,float b);
     std::vector<unsigned> slice_situation;
     std::vector<VertexData> getEdgeVertices(const std::vector<VertexData>& data, int Nx, int Ny, int Nz);
     QColor stColor(float a, float mn, float mx);
