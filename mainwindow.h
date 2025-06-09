@@ -3,6 +3,7 @@
 
 #include <QMainWindow>
 #include "params.h"
+#include "dialogsetparams.h"
 
 namespace Ui {
 class MainWindow;
@@ -35,33 +36,9 @@ private slots:
 
     void on_colorshow_triggered();
 
-    void on_doubleSpinBox_X_Min_editingFinished();
+//    void on_openFile_triggered();
 
-    void on_doubleSpinBox_Y_Min_editingFinished();
-
-    void on_doubleSpinBox_X_Step_editingFinished();
-
-    void on_spinBox_X_Count_editingFinished();
-
-    void on_doubleSpinBox_Y_Step_editingFinished();
-
-    void on_spinBox_Y_Count_editingFinished();
-
-    void on_doubleSpinBox_Z_Min_editingFinished();
-
-    void on_doubleSpinBox_Z_Step_editingFinished();
-
-    void on_spinBox_Z_Count_editingFinished();
-
-    void on_openFile_triggered();
-
-    void on_drawModel_triggered();
-
-    void on_doubleSpinBox_interp_power_editingFinished();
-
-    void on_doubleSpinBox_radius_editingFinished();
-
-    void on_spinBox_min_points_editingFinished();
+//    void on_drawModel_triggered();
 
     void on_action_show_location_triggered();
 
@@ -69,9 +46,14 @@ private slots:
 
     void on_action_show_slice_location_triggered();
 
+    void on_CreateModel_triggered();
+
+    void on_LoadModel_triggered();
+
 private:
     Ui::MainWindow *ui;
     Params *params;
+    DialogSetParams *setParams = nullptr;
 
     bool fileRead; // 标志是否读入了文件
     bool readFile(const QString &FileName);

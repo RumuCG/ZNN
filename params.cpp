@@ -1,4 +1,3 @@
-
 #include "params.h"
 #include <QFile>
 #include <QCoreApplication>
@@ -8,10 +7,10 @@
 Params::Params(QObject *parent) :
     QObject(parent)
 {
-    outputFileName = "velocity_model.vpr";
-    inputFileName = "";
-    min_v = 5300.0f;
-    max_v = 3700.0f;
+    outputFileName.clear();
+    inputFileName.clear();
+    min_v = 0.0f;
+    max_v = 0.0f;
 
     for (int i = 0; i < 3; i++) {
         axisMin[i] = 0.0f;

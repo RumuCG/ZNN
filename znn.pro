@@ -28,15 +28,18 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     znnwidget.cpp \
-    params.cpp
+    params.cpp \
+    dialogsetparams.cpp
 
 HEADERS += \
         mainwindow.h \
     znnwidget.h \
-    params.h
+    params.h \
+    dialogsetparams.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    dialogsetparams.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

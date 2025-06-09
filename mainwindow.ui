@@ -49,69 +49,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QLabel" name="label_Y_Min">
-        <property name="text">
-         <string>最小值</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_Y_Min">
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="decimals">
-         <number>6</number>
-        </property>
-        <property name="minimum">
-         <double>-99999.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>99999.990000000005239</double>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_Y_Step">
-        <property name="text">
-         <string>步长</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_Y_Step">
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="decimals">
-         <number>6</number>
-        </property>
-        <property name="minimum">
-         <double>-99999.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>99999.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_Y_Count">
-        <property name="text">
-         <string>数量</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="spinBox_Y_Count">
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="maximum">
-         <number>999</number>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
     <item row="0" column="0">
@@ -245,54 +182,6 @@
         </property>
        </spacer>
       </item>
-      <item>
-       <widget class="QLabel" name="label_interp_power">
-        <property name="text">
-         <string>插值幂指数</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_interp_power">
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="decimals">
-         <number>6</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_radius">
-        <property name="text">
-         <string>差值搜索半径</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_radius">
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="decimals">
-         <number>6</number>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_min_points">
-        <property name="text">
-         <string>最少插值点</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="spinBox_min_points">
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
     <item row="3" column="0">
@@ -318,69 +207,6 @@
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_X_Min">
-        <property name="text">
-         <string>最小值</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_X_Min">
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="decimals">
-         <number>6</number>
-        </property>
-        <property name="minimum">
-         <double>-99999.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>99999.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_X_Step">
-        <property name="text">
-         <string>步长</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_X_Step">
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="decimals">
-         <number>6</number>
-        </property>
-        <property name="minimum">
-         <double>-99999.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>99999.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_X_Count">
-        <property name="text">
-         <string>数量</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="spinBox_X_Count">
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="maximum">
-         <number>999</number>
         </property>
        </widget>
       </item>
@@ -412,69 +238,6 @@
         </property>
        </widget>
       </item>
-      <item>
-       <widget class="QLabel" name="label_Z_Min">
-        <property name="text">
-         <string>最小值</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_Z_Min">
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="decimals">
-         <number>6</number>
-        </property>
-        <property name="minimum">
-         <double>-99999.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>99999.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_Z_Step">
-        <property name="text">
-         <string>步长</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QDoubleSpinBox" name="doubleSpinBox_Z_Step">
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="decimals">
-         <number>6</number>
-        </property>
-        <property name="minimum">
-         <double>-99999.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>99999.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_Z_Count">
-        <property name="text">
-         <string>数量</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QSpinBox" name="spinBox_Z_Count">
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="maximum">
-         <number>999</number>
-        </property>
-       </widget>
-      </item>
      </layout>
     </item>
    </layout>
@@ -486,8 +249,8 @@
    <attribute name="toolBarBreak">
     <bool>false</bool>
    </attribute>
-   <addaction name="openFile"/>
-   <addaction name="drawModel"/>
+   <addaction name="CreateModel"/>
+   <addaction name="LoadModel"/>
    <addaction name="actxc"/>
    <addaction name="colorshow"/>
    <addaction name="action_show_location"/>
@@ -495,31 +258,23 @@
    <addaction name="action_show_slice_location"/>
   </widget>
   <widget class="QStatusBar" name="statusBar"/>
-  <action name="openFile">
+  <action name="LoadModel">
    <property name="text">
-    <string>读取文件</string>
+    <string>导入模型</string>
    </property>
    <property name="toolTip">
-    <string>选择一个源文件并读取</string>
+    <string>选择导入一个.vpr文件并渲染</string>
    </property>
   </action>
-  <action name="drawModel">
-   <property name="text">
-    <string>渲染模型</string>
-   </property>
-   <property name="toolTip">
-    <string>根据选择的文件和配置的参数，显示模型</string>
-   </property>
-  </action>
-  <action name="actframe">
-   <property name="checkable">
-    <bool>true</bool>
-   </property>
+  <action name="CreateModel">
    <property name="checked">
     <bool>false</bool>
    </property>
    <property name="text">
-    <string>线框渲染</string>
+    <string>生成模型</string>
+   </property>
+   <property name="toolTip">
+    <string>填写参数生成模型</string>
    </property>
   </action>
   <action name="actdy">
