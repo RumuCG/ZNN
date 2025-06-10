@@ -66,6 +66,16 @@
          <string>1DIPL.exe</string>
         </property>
        </item>
+       <item>
+        <property name="text">
+         <string>L2M.exe</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>SMIPL.exe</string>
+        </property>
+       </item>
       </widget>
      </item>
      <item>

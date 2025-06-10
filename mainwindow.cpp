@@ -206,15 +206,17 @@ void MainWindow::on_CreateModel_triggered()
     }
 
     // 尝试差值程序
-    QString programPath = QCoreApplication::applicationDirPath() + "/1DIPL/1DIPL.exe";
+    QString exe = setParams->getExe();
+    QString programPath = QCoreApplication::applicationDirPath() + "/Interpolation/" + exe;
     if (!QFileInfo::exists(programPath)) {
-        qWarning() << "1DIPL.exe 不存在：" << programPath;
+        qWarning() << exe << " 不存在：" << programPath;
         return;
     }
+    qDebug() << "Starting " << programPath;
 
     QProcess process;
     process.setProgram(programPath);
-    process.setWorkingDirectory(QCoreApplication::applicationDirPath() + "/1DIPL");
+    process.setWorkingDirectory(QCoreApplication::applicationDirPath() + "/Interpolation");
     process.start();
 
     if (!process.waitForStarted(3000)) {
@@ -254,78 +256,4 @@ void MainWindow::on_LoadModel_triggered()
     fileRead = ui->openGLWidget->loadData(filePath);
 
     return;
-    //bool MainWindow::readFile(const QString &FileName)
-    //{
-    //    qDebug() << "reading File\n";
-    //    // 以只读方式打开数据文件
-    //    QFile dataFile(FileName);
-    //    qDebug() << "ready to read " << FileName << '\n';
-    //    if (not dataFile.open(QIODevice::ReadOnly | QIODevice::Text)) { // QIODevice::Text 处理换行符号
-    //        qDebug() << "Fail to read File " << FileName << '\n';
-    //        return false;
-    //    }
-    //    QTextStream in(&dataFile);
-    //    QStringList lines = in.readAll()                                // 读取所有行
-    //            .split('\n', QString::SkipEmptyParts);    // 只将非空行存到lines里面
-
-
-    //    ui->openGLWidget->resetData();
-
-    //    unsigned pos = 0; // 记录坐标
-    //    bool headLine = true; // 特殊处理第一行
-    //    for (const QString &line : lines) {
-    //        QStringList valueList = line.split(' ', QString::SkipEmptyParts);
-    //        if (valueList.empty()) {
-    //            continue;
-    //        }
-
-    //        if (headLine) {                         // 第一行读入最值
-    //            params->setValueRange(valueList[0].toFloat(), valueList[1].toFloat());
-    //            headLine = false;
-    //        }
-    //        else {
-    //            for (const QString &v : valueList) {
-    //                ui->openGLWidget->getData(pos++, v.toFloat());
-    //            }
-    //        }
-    //    }
-    //    qDebug() << "VPR file read ok !\n" << ui->openGLWidget->modelData.size() << " datas Read\n";
-    //    dataFile.close();
-
-    //    QFile wellFile(params->inputFileName);
-    //    qDebug() << "ready to read " << params->inputFileName << '\n';
-    //    if (not wellFile.open(QIODevice::ReadOnly | QIODevice::Text)) { // QIODevice::Text 处理换行符号
-    //        qDebug() << "Fail to read File " << params->inputFileName << '\n';
-    //        return false;
-    //    }
-    //    QTextStream wellIn(&wellFile);
-    //    QStringList wellLines = wellIn.readAll()                                // 读取所有行
-    //            .split('\n', QString::SkipEmptyParts);    // 只将非空行存到wellLines里面
-
-    //    headLine = true;
-    //    for (const QString &line : wellLines) {
-    //        QStringList valueList = line.split('\t', QString::SkipEmptyParts);
-    //        if (valueList.empty()) {
-    //            continue;
-    //        }
-
-    //        float z = valueList[3].toFloat(), val = valueList[0].toFloat();
-    //        if (params->inRange(2, z)) {
-    //            ui->openGLWidget->well.push_back({ z, val });
-    //        }
-
-    //        if (headLine) {
-    //            ui->openGLWidget->well_x = valueList[1].toFloat();
-    //            ui->openGLWidget->well_y = valueList[2].toFloat();
-    //            headLine = false;
-    //        }
-    //    }
-    //    qDebug() << "Well file read ok !\n" << ui->openGLWidget->well.size() << " datas Read\n";
-    //    qDebug() << ui->openGLWidget->well_x << ' ' << ui->openGLWidget->well_y;
-    //    qDebug() << ui->openGLWidget->well.back().first << '\n';
-    //    wellFile.close();
-
-    //    ui->openGLWidget->processData();
-    //    return true;;
-    //}
 }

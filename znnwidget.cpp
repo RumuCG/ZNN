@@ -566,7 +566,83 @@ int znnwidget::getMaxCount(int id)
 bool znnwidget::loadData(QString Modelfile)
 {
     qDebug() << "loading...";
-    return false;
+    QFile dataFile(Modelfile);
+    qDebug() << "ready to read " << Modelfile << '\n';
+    if (not dataFile.open(QIODevice::ReadOnly | QIODevice::Text)) { // QIODevice::Text 处理换行符号
+        qDebug() << "Fail to read File " << Modelfile << '\n';
+        return false;
+    }
+
+    QTextStream M_in(&dataFile);;
+    int row = 0, pos =0;
+    QString Wellfile{};
+    for (const QString &line : M_in.readAll().split('\n', QString::SkipEmptyParts)) {
+        row++;
+        if (row == 2) {
+            Wellfile = line;
+            break;
+        }
+
+        QStringList valueList = line.split(' ', QString::SkipEmptyParts);
+        if (valueList.empty()) {
+            continue;
+        }
+        switch (row) {
+        case 1:
+            params->setValueRange(valueList[0].toFloat(), valueList[1].toFloat());
+            break;
+        case 3:
+            for (int i = 0; i < 3; i++) {
+                params->axisMin[i] = valueList[i * 3].toFloat();
+                params->axisStep[i] = valueList[i * 3 + 1].toFloat();
+                params->axisCount[i] = valueList[i * 3 + 2].toInt();
+            }
+
+            resetData();    // 在读完必要的参数后，才可以初始化
+            break;
+        default:
+            for (const QString &v : valueList) {
+                getData(pos++, v.toFloat());
+            }
+            break;
+        }
+    }
+    qDebug() << "VPR file read ok !\n" << modelData.size() << " datas Read\n";
+    dataFile.close();
+
+    dataFile.setFileName(Wellfile);
+    qDebug() << "ready to read " << Wellfile << '\n';
+    if (not dataFile.open(QIODevice::ReadOnly | QIODevice::Text)) { // QIODevice::Text 处理换行符号
+        qDebug() << "Fail to read File " << Wellfile << '\n';
+        return false;
+    }
+
+    QTextStream W_in(&dataFile);
+    bool headLine = true; // 特殊处理第一行
+    for (const QString &line : W_in.readAll().split('\n', QString::SkipEmptyParts)) {
+        QStringList valueList = line.split('\t', QString::SkipEmptyParts);
+        if (valueList.empty()) {
+            continue;
+        }
+
+        float z = valueList[3].toFloat(), val = valueList[0].toFloat();
+        if (params->inRange(2, z)) {
+            well.push_back({ z, val });
+        }
+
+        if (headLine) {
+            well_x = valueList[1].toFloat();
+            well_y = valueList[2].toFloat();
+            headLine = false;
+        }
+    }
+    qDebug() << "Well file read ok !\n" << well.size() << " datas Read\n";
+    qDebug() << well_x << ' ' << well_y;
+    qDebug() << well.back().first << '\n';
+    dataFile.close();
+
+    processData();
+    return true;
 }
 
 void znnwidget::processData()

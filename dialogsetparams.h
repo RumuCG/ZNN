@@ -19,13 +19,14 @@ public:
     QString inputFile;
     QString outputFile;
 
-    // IPL信息 // 不懂
+    // IPL信息
     float interpPower;
     float radius;
     int minPoints;
 
     void getParams();
     bool writeConfig();              // 写数据到 config.ini
+    QString getExe();
 private slots:
     void on_BtnChooseInput_clicked();
 

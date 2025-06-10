@@ -62,6 +62,11 @@ void DialogSetParams::getParams()
     minPoints = ui->spinBox_min_points->value();;
 }
 
+QString DialogSetParams::getExe()
+{
+    return ui->exeBox->currentText();
+}
+
 // 选择模型文件的源文件(井文件)
 void DialogSetParams::on_BtnChooseInput_clicked()
 {
@@ -175,9 +180,9 @@ bool DialogSetParams::writeConfig()
     }
 
     // 根据参数创建config.ini
-    QFile file(QCoreApplication::applicationDirPath() + "/1DIPL/config.ini");
+    QFile file(QCoreApplication::applicationDirPath() + "/Interpolation/config.ini");
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        qDebug() << "fail to open " << (QCoreApplication::applicationDirPath() + "/1DIPL/config.ini");
+        qDebug() << "fail to open " << (QCoreApplication::applicationDirPath() + "/Interpolation/config.ini");
         return false;
     }
 
