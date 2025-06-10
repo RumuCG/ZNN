@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "params.h"
 #include "dialogsetparams.h"
 
 namespace Ui {
@@ -52,7 +51,6 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    Params *params;
     DialogSetParams *setParams = nullptr;
 
     bool fileRead; // 标志是否读入了文件

@@ -35,7 +35,8 @@ HEADERS += \
         mainwindow.h \
     znnwidget.h \
     params.h \
-    dialogsetparams.h
+    dialogsetparams.h \
+    baseparams.h
 
 FORMS += \
         mainwindow.ui \

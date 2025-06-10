@@ -3,15 +3,15 @@
 #include <QVBoxLayout>
 #include <QProcess>
 #include <QFileInfo>
+#include <QDir>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    params(new Params(this))
+    ui(new Ui::MainWindow)
 {
     this->setStyleSheet("background-color: rgb(21, 160, 221);");  // 浅紫色（plum）
     ui->setupUi(this);
-    ui->openGLWidget->initParams(params);
     ui->statusBar->showMessage("当前未读取文件");
     //  设置显示模型的初始角度
     ui->horizontalSlider->setValue(50);
@@ -72,13 +72,14 @@ void MainWindow::on_DisplayMode_currentIndexChanged(int index)
     //    ui->PositionBox->setEnabled(enable);
 
     if (index == 0) {   // NULL 啥都不干
-        ui->PostionSlider->setValue(0);
         ui->openGLWidget->setShape(ui->openGLWidget->None);
         ui->openGLWidget->update();
     }
-    else if (not fileRead) { // 未读入文件时，禁止选择其他选项
+    else if (not fileRead) {
         ui->DisplayMode->setCurrentIndex(0);
+        index = 0;
     }
+
     switch (index) {
     case 1:             // A 显示全部 6 个面
         ui->PostionSlider->setValue(0);
@@ -90,7 +91,7 @@ void MainWindow::on_DisplayMode_currentIndexChanged(int index)
     case 2:             // X 沿X轴显示切片
         ui->PostionSlider->setValue(0);
         ui->PostionSlider->setMinimum(0);
-        ui->PostionSlider->setMaximum(params->axisCount[0] - 1);
+        ui->PostionSlider->setMaximum(ui->openGLWidget->getMaxCount(0));
         // qDebug() << ui->openGLWidget->num_x;
         ui->openGLWidget->setShape(ui->openGLWidget->SliceYZ);
         ui->openGLWidget->getSliceIndex(2, 0u);
@@ -99,7 +100,7 @@ void MainWindow::on_DisplayMode_currentIndexChanged(int index)
     case 3:             // Y 沿Y轴显示切片
         ui->PostionSlider->setValue(0);
         ui->PostionSlider->setMinimum(0);
-        ui->PostionSlider->setMaximum(params->axisCount[1] - 1);
+        ui->PostionSlider->setMaximum(ui->openGLWidget->getMaxCount(1));
         ui->openGLWidget->setShape(ui->openGLWidget->SliceXZ);
         ui->openGLWidget->getSliceIndex(3, 0u);
 
@@ -107,7 +108,7 @@ void MainWindow::on_DisplayMode_currentIndexChanged(int index)
     case 4:             // Z 沿Z轴显示切片
         ui->PostionSlider->setValue(0);
         ui->PostionSlider->setMinimum(0);
-        ui->PostionSlider->setMaximum(params->axisCount[2] - 1);
+        ui->PostionSlider->setMaximum(ui->openGLWidget->getMaxCount(2));
         ui->openGLWidget->setShape(ui->openGLWidget->SliceXY);
         ui->openGLWidget->getSliceIndex(4, 0u);
 
@@ -187,20 +188,11 @@ void MainWindow::on_CreateModel_triggered()
             break;
         }
 
-        // 读取参数
-        params->inputFileName = setParams->inputFile();
-        params->outputFileName = setParams->outputFile();
-        for (int i = 0; i < 3; i++) {
-            params->axisMin[i] = setParams->axisMin(i);
-            params->axisStep[i] = setParams->axisStep(i);
-            params->axisCount[i] = setParams->axisCount(i);
-        }
-        params->interpPower = setParams->ipow();
-        params->radius = setParams->radius();
-        params->minPoint = setParams->minPoints();
+        // 读取用户写入的参数
+        setParams->getParams();
 
         // 如果能正确生成 config 文件就直接退出，否则说明参数填写有误需要重新填写
-        if (params->writeConfig()) {
+        if (setParams->writeConfig()) {
             qDebug() << "正确参数，直接退出";
             ready = true;
             break;
@@ -247,6 +239,21 @@ void MainWindow::on_CreateModel_triggered()
 
 void MainWindow::on_LoadModel_triggered()
 {
+    // 选择模型文件
+    QString filePath = QFileDialog::getOpenFileName(
+                this,
+                "选择模型文件",
+                QDir::homePath(), // 默认目录
+                "模型文件 (*.vpr)" // 过滤器
+                );
+    // 未选择文件
+    if (filePath.isEmpty()) {
+        return;
+    }
+
+    fileRead = ui->openGLWidget->loadData(filePath);
+
+    return;
     //bool MainWindow::readFile(const QString &FileName)
     //{
     //    qDebug() << "reading File\n";

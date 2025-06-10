@@ -32,9 +32,6 @@ class znnwidget : public QOpenGLWidget,QOpenGLFunctions_3_3_Core
     Q_OBJECT
 public:
     explicit znnwidget(QWidget *parent = nullptr);
-    // 初始化参数类（存放与差值程序交互的数据信息），时znnwidget中的参数类指针和mainwindow中的参数类指针指向同一个地方
-    // 以同步数据
-    void initParams(Params *p = nullptr);
 
     float angleX = 90.0f; // 旋转角度 各轴
     float angleY = 0.0f;
@@ -55,6 +52,8 @@ public:
     std::vector<VertexData> modelData; // 每个点的数据
     void resetData();                  // 重置所有数据，并预存空间
     void getData(int pos, float v);
+    int getMaxCount(int id);
+    bool loadData(QString Modelfile);                   // 导入待处理的模型数据
     void processData();                // 处理读入的数据
     // < -------------------------- 井的数据------------------------------------->
     std::vector<std::pair<float,float>> well;

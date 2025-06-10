@@ -1,6 +1,7 @@
 ﻿#include "znnwidget.h"
 znnwidget::znnwidget(QWidget *parent) :
     QOpenGLWidget(parent),
+    params(new Params(this)),
     Axis_VBO(QOpenGLBuffer::VertexBuffer),      // 指定为vbo
     Axis_EBO(QOpenGLBuffer::IndexBuffer),       // 指定为ebo
     Data_VBO(QOpenGLBuffer::VertexBuffer),      // 指定为vbo
@@ -11,10 +12,6 @@ znnwidget::znnwidget(QWidget *parent) :
     connect(&timer_1,SIGNAL(timeout()),this,SLOT(on_timeout()));
 }
 
-void znnwidget::initParams(Params *p)
-{
-    params = p;
-}
 
 void znnwidget::setShape(znnwidget::Shape shape)
 {
@@ -559,6 +556,17 @@ void znnwidget::resetData()
 void znnwidget::getData(int pos, float v)
 {
     modelData.push_back(VertexData(params->getRealPos(pos), stColor(v, params->min_v, params->max_v)));
+}
+
+int znnwidget::getMaxCount(int id)
+{
+    return params->axisCount[id];
+}
+
+bool znnwidget::loadData(QString Modelfile)
+{
+    qDebug() << "loading...";
+    return false;
 }
 
 void znnwidget::processData()

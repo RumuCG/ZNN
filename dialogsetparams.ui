@@ -44,7 +44,7 @@
      <item>
       <widget class="QLabel" name="label_outputFile">
        <property name="text">
-        <string>当前未指定保存路径以及文件名</string>
+        <string/>
        </property>
       </widget>
      </item>
