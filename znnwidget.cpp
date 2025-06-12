@@ -580,7 +580,7 @@ bool znnwidget::loadData(QString Modelfile)
         row++;
         if (row == 2) {
             Wellfile = line;
-            break;
+            continue;
         }
 
         QStringList valueList = line.split(' ', QString::SkipEmptyParts);
@@ -684,18 +684,52 @@ void znnwidget::processData()
     doneCurrent();
     update();
 }
+
+// 0.0  255 0   0
+// 0.2  255 102 0
+// 0.4  255 255 0
+// 0.6  0   255 0
+// 0.8  0   255 255
+// 1.0  0   0   255
 QColor znnwidget::stColor(float a, float mn, float mx) {
     // 根据速度的最大值和最小值将该节点的速度值归一化到[0.0, 1.0]
-    double t = (mx - a) / (mx - mn);
+    double t = static_cast<double>((a - mn) / (mx - mn));
     if (t < 0.0) t = 0.0;
     if (t > 1.0) t = 1.0;
-    // 使用 HSL 颜色进行过度
-    // 计算色相(240.0为蓝 360.0为红)
-    double hue = 240.0 + 120.0 * t;
 
-    QColor tmp = QColor::fromHslF(hue / 360.0, 1.0, 0.5);
+    auto getval = [](double d, int v0, int v1) -> int {
+        d /= 0.2;
+        return v0 + static_cast<int>(d * (v1 - v0));
+    };
 
-    return tmp;
+    int r = 0, g = 0, b = 0;
+    if (t <= 0.2) {
+        r = 255;
+        g = getval(t - 0.0, 0, 102);
+        b = 0;
+    }
+    else if (t <= 0.4) {
+        r = 255;
+        g = getval(t - 0.2, 102, 255);
+        b = 0;
+    }
+    else if (t <= 0.6) {
+        r = getval(t - 0.4, 255, 0);
+        g = 255;
+        b = 0;
+    }
+    else if (t <= 0.8) {
+        r = 0;
+        g = 255;
+        b = getval(t - 0.6, 0, 255);
+    }
+    else {
+        r = 0;
+        g = getval(t - 0.8, 255, 0);
+        b = 255;
+    }
+
+    return QColor(r, g, b);
 }
 znnwidget::~znnwidget()
 {

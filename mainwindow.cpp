@@ -91,7 +91,7 @@ void MainWindow::on_DisplayMode_currentIndexChanged(int index)
     case 2:             // X 沿X轴显示切片
         ui->PostionSlider->setValue(0);
         ui->PostionSlider->setMinimum(0);
-        ui->PostionSlider->setMaximum(ui->openGLWidget->getMaxCount(0));
+        ui->PostionSlider->setMaximum(ui->openGLWidget->getMaxCount(0) - 1);
         // qDebug() << ui->openGLWidget->num_x;
         ui->openGLWidget->setShape(ui->openGLWidget->SliceYZ);
         ui->openGLWidget->getSliceIndex(2, 0u);
@@ -100,7 +100,7 @@ void MainWindow::on_DisplayMode_currentIndexChanged(int index)
     case 3:             // Y 沿Y轴显示切片
         ui->PostionSlider->setValue(0);
         ui->PostionSlider->setMinimum(0);
-        ui->PostionSlider->setMaximum(ui->openGLWidget->getMaxCount(1));
+        ui->PostionSlider->setMaximum(ui->openGLWidget->getMaxCount(1) - 1);
         ui->openGLWidget->setShape(ui->openGLWidget->SliceXZ);
         ui->openGLWidget->getSliceIndex(3, 0u);
 
@@ -108,7 +108,7 @@ void MainWindow::on_DisplayMode_currentIndexChanged(int index)
     case 4:             // Z 沿Z轴显示切片
         ui->PostionSlider->setValue(0);
         ui->PostionSlider->setMinimum(0);
-        ui->PostionSlider->setMaximum(ui->openGLWidget->getMaxCount(2));
+        ui->PostionSlider->setMaximum(ui->openGLWidget->getMaxCount(2) - 1);
         ui->openGLWidget->setShape(ui->openGLWidget->SliceXY);
         ui->openGLWidget->getSliceIndex(4, 0u);
 
